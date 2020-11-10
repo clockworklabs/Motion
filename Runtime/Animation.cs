@@ -7,6 +7,7 @@ namespace Motion
         private static uint nextId;
 
         public Action OnLoopCallback { get; protected set; }
+        public Action OnIntervalCallback { get; protected set; }
         public Action OnCompleteCallback { get; protected set; }
         
         public uint ID { get; }
@@ -32,7 +33,7 @@ namespace Motion
             get => delay;
             protected set
             {
-                if (Playing && value > delay) return;
+                if (Playing) return;
                 
                 delay = value;
             }
@@ -44,7 +45,7 @@ namespace Motion
             get => loopsCount;
             protected set
             {
-                if (Playing && value > loopsCount) return;
+                if (Playing) return;
 
                 loopsCount = value;
             }
@@ -62,6 +63,33 @@ namespace Motion
             }
         }
 
+        private int interval;
+        public int Interval
+        {
+            get => interval;
+            protected set
+            {
+                if (Playing) return;
+
+                interval = value;
+            }
+        }
+
+        private float intervalDelay;
+        public float IntervalDelay
+        {
+            get => intervalDelay;
+            protected set
+            {
+                if (Playing) return;
+                
+                intervalDelay = value;
+            }
+        }
+
+        private float Time { get; set; }
+        protected int Loop { get; set; }
+
         protected Animation()
         {
             ID = nextId++;
@@ -75,6 +103,9 @@ namespace Motion
             Delay = 0;
             LoopsCount = 1;
             LoopType = LoopType.Restart;
+            Time = 0;
+            Loop = 0;
+            
             OnLoopCallback = null;
             OnCompleteCallback = null;
         }
@@ -84,6 +115,12 @@ namespace Motion
             if (Completed) return;
 
             Playing = true;
+
+            Time += deltaTime;
+            if (Time < Delay)
+            {
+                return;
+            }
 
             if (Tick(deltaTime))
             {

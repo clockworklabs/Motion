@@ -40,11 +40,16 @@ namespace Motion
 
         private float Time { get; set; }
         
+        private bool IsInterval { get; set; }
+        private float Accum { get; set; }
+        
         protected override void Setup()
         {
             SetTween(Tween.Default);
 
             Time = 0;
+            IsInterval = false;
+            Accum = 0;
         }
 
         public TweenAnimation<T> SetDelay(float delay)
@@ -58,6 +63,14 @@ namespace Motion
         {
             LoopsCount = loops;
             LoopType = loopType;
+
+            return this;
+        }
+
+        public TweenAnimation<T> SetInterval(int interval, float delay = 0)
+        {
+            Interval = interval;
+            IntervalDelay = delay;
 
             return this;
         }
@@ -77,6 +90,13 @@ namespace Motion
             return this;
         }
 
+        public TweenAnimation<T> OnInterval(Action callback)
+        {
+            OnIntervalCallback = callback;
+
+            return this;
+        }
+
         public TweenAnimation<T> OnComplete(Action callback)
         {
             OnCompleteCallback = callback;
@@ -89,28 +109,34 @@ namespace Motion
             {
                 return true;
             }
-            
-            if (Delay > 0)
-            {
-                Delay -= deltaTime;
-                deltaTime = -Delay;
-            }
 
-            if (deltaTime <= 0)
+            if (IsInterval)
             {
-                return false;
+                if (Accum < IntervalDelay)
+                {
+                    Accum += deltaTime;
+                    return false;
+                }
+
+                IsInterval = false;
+                Accum = 0;
             }
 
             Time = Mathf.Clamp01(Time + deltaTime * InverseDuration);
             
             if (Time >= 1)
             {
-                LoopsCount--;
-
-                if (LoopsCount == 0)
+                Loop++;
+                IsInterval = Interval > 0 && Loop % Interval == 0;
+                
+                if (Loop >= LoopsCount)
                 {
                     Setter(Target);
                     OnLoopCallback?.Invoke();
+                    if (IsInterval)
+                    {
+                        OnIntervalCallback?.Invoke();
+                    }
                     OnCompleteCallback?.Invoke();
                     return true;
                 }
@@ -119,9 +145,13 @@ namespace Motion
                 {
                     SwapOriginAndTarget();
                 }
-                
+
                 Setter(Origin);
                 OnLoopCallback?.Invoke();
+                if (IsInterval)
+                {
+                    OnIntervalCallback?.Invoke();
+                }
                 
                 return false;
             }

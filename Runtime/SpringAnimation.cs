@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
@@ -18,9 +19,15 @@ namespace Motion
         
         public T Velocity { get; private set; }
         
+        private bool IsInterval { get; set; }
+        private float Accum { get; set; }
+        
         protected override void Setup()
         {
             SetSpring(Spring.Default);
+            
+            IsInterval = false;
+            Accum = 0;
         }
 
         public SpringAnimation<T> SetDelay(float delay)
@@ -34,6 +41,14 @@ namespace Motion
         {
             LoopsCount = loops;
             LoopType = loopType;
+
+            return this;
+        }
+
+        public SpringAnimation<T> SetInterval(int interval, float delay = 0)
+        {
+            Interval = interval;
+            IntervalDelay = delay;
 
             return this;
         }
@@ -59,6 +74,13 @@ namespace Motion
             return this;
         }
 
+        public SpringAnimation<T> OnInterval(Action callback)
+        {
+            OnIntervalCallback = callback;
+
+            return this;
+        }
+
         public SpringAnimation<T> OnComplete(Action callback)
         {
             OnCompleteCallback = callback;
@@ -71,16 +93,17 @@ namespace Motion
             {
                 return true;
             }
-            
-            if (Delay > 0)
-            {
-                Delay -= deltaTime;
-                deltaTime = -Delay;
-            }
 
-            if (deltaTime <= 0)
+            if (IsInterval)
             {
-                return false;
+                if (Accum < IntervalDelay)
+                {
+                    Accum += deltaTime;
+                    return false;
+                }
+
+                IsInterval = false;
+                Accum = 0;
             }
 
             // Object position and velocity.
@@ -88,11 +111,17 @@ namespace Motion
             var delta = Subtract(value, Target);
             if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && SqrMagnitude(delta) < Spring.sqrRestDelta)
             {
-                LoopsCount--;
+                Loop++;
+                IsInterval = Loop % Interval == 0;
 
-                if (LoopsCount == 0)
+                if (Loop >= LoopsCount)
                 {
                     Setter(Target);
+                    OnLoopCallback?.Invoke();
+                    if (IsInterval)
+                    {
+                        OnIntervalCallback?.Invoke();
+                    }
                     OnCompleteCallback?.Invoke();
                     return true;
                 }
@@ -104,6 +133,10 @@ namespace Motion
                 
                 Setter(Origin);
                 OnLoopCallback?.Invoke();
+                if (IsInterval)
+                {
+                    OnIntervalCallback?.Invoke();
+                }
                 
                 return false;
             }

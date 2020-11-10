@@ -34,6 +34,7 @@ namespace Motion
         }
         #endregion
         
+        private HashSet<uint> ActiveIds { get; } = new HashSet<uint>();
         private List<Animation> ActiveAnimations { get; } = new List<Animation>();
         private Dictionary<Type, Stack<Animation>> FreeAnimations { get; } = new Dictionary<Type, Stack<Animation>>();
         
@@ -74,6 +75,7 @@ namespace Motion
                 animation = new T();
                 animation.Reset();
             }
+            ActiveIds.Add(animation.ID);
             ActiveAnimations.Add(animation);
             
             return animation;
@@ -81,8 +83,9 @@ namespace Motion
 
         private void ReturnToPool(uint id)
         {
-            var index = ActiveAnimations.FindIndex(anim => anim.ID == id);
+            if (!ActiveIds.Contains(id)) return;
             
+            var index = ActiveAnimations.FindIndex(anim => anim.ID == id);
             ReturnToPool(index);
         }
 
@@ -94,12 +97,13 @@ namespace Motion
             }
             
             var animation = ActiveAnimations[index];
-            animation.Reset();
             var type = animation.GetType();
             
+            ActiveIds.Remove(animation.ID);
             ActiveAnimations.RemoveAtSwapBack(index);
             if (FreeAnimations.TryGetValue(type, out var freeStack))
             {
+                animation.Reset();
                 freeStack.Push(animation);
             }
         }
