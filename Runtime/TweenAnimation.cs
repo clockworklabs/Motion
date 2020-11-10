@@ -129,7 +129,7 @@ namespace Motion
                 Loop++;
                 IsInterval = Interval > 0 && Loop % Interval == 0;
                 
-                if (Loop >= LoopsCount)
+                if (LoopsCount > 0 && Loop >= LoopsCount)
                 {
                     Setter(Target);
                     OnLoopCallback?.Invoke();
