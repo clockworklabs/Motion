@@ -1,0 +1,16 @@
+{
+  "name": "com.clockworklabs.motion",
+  "version": "1.0.0",
+  "displayName": "Motion",
+  "description": "Animation system for Rish",
+  "unity": "2019.4",
+  "author": {
+    "name": "Lisandro Crespo",
+    "email": "hey@lisandroct.com",
+    "url": "https://lisandroct.com"
+  },
+  "dependencies": {
+    "com.unity.collections": "0.9.0-preview.6"
+  },
+  "type": "library"
+}
