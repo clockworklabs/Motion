@@ -112,7 +112,7 @@ namespace Motion
             if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && SqrMagnitude(delta) < Spring.sqrRestDelta)
             {
                 Loop++;
-                IsInterval = Loop % Interval == 0;
+                IsInterval = Interval > 0 && Loop % Interval == 0;
 
                 if (Loop >= LoopsCount)
                 {
