@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
@@ -69,6 +70,20 @@ namespace Motion
             return this;
         }
 
+        public TweenAnimation<T> OnLoop(Action callback)
+        {
+            OnLoopCallback = callback;
+
+            return this;
+        }
+
+        public TweenAnimation<T> OnComplete(Action callback)
+        {
+            OnCompleteCallback = callback;
+
+            return this;
+        }
+
         protected override bool Tick(float deltaTime) {
             if (LoopsCount == 0)
             {
@@ -95,6 +110,8 @@ namespace Motion
                 if (LoopsCount == 0)
                 {
                     Setter(Target);
+                    OnLoopCallback?.Invoke();
+                    OnCompleteCallback?.Invoke();
                     return true;
                 }
                 
@@ -104,6 +121,7 @@ namespace Motion
                 }
                 
                 Setter(Origin);
+                OnLoopCallback?.Invoke();
                 
                 return false;
             }

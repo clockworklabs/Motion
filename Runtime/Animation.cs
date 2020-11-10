@@ -5,6 +5,9 @@ namespace Motion
     public abstract class Animation
     {
         private static uint nextId;
+
+        public Action OnLoopCallback { get; protected set; }
+        public Action OnCompleteCallback { get; protected set; }
         
         public uint ID { get; }
         
@@ -72,6 +75,8 @@ namespace Motion
             Delay = 0;
             LoopsCount = 1;
             LoopType = LoopType.Restart;
+            OnLoopCallback = null;
+            OnCompleteCallback = null;
         }
 
         internal void Step(float deltaTime)

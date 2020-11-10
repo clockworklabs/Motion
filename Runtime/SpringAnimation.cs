@@ -1,4 +1,6 @@
-﻿namespace Motion
+﻿using System;
+
+namespace Motion
 {
     public abstract class SpringAnimation<T> : Animation<T> where T : struct
     {
@@ -50,6 +52,20 @@
             return this;
         }
 
+        public SpringAnimation<T> OnLoop(Action callback)
+        {
+            OnLoopCallback = callback;
+
+            return this;
+        }
+
+        public SpringAnimation<T> OnComplete(Action callback)
+        {
+            OnCompleteCallback = callback;
+
+            return this;
+        }
+
         protected override bool Tick(float deltaTime) {
             if (LoopsCount == 0)
             {
@@ -77,6 +93,7 @@
                 if (LoopsCount == 0)
                 {
                     Setter(Target);
+                    OnCompleteCallback?.Invoke();
                     return true;
                 }
                 
@@ -86,6 +103,7 @@
                 }
                 
                 Setter(Origin);
+                OnLoopCallback?.Invoke();
                 
                 return false;
             }
