@@ -22,10 +22,7 @@ namespace Motion
 
         internal void Setup(Animation[] animations)
         {
-            if (animations == null)
-            {
-                return;
-            }
+            if (animations == null) return;
             
             for (var i = animations.Length - 1; i >= 0; i--)
             {
@@ -43,7 +40,6 @@ namespace Motion
             for (var i = Animations.Count - 1; i >= 0; i--)
             {
                 var animation = Animations[i];
-
                 
                 animation.Step(deltaTime);
                 

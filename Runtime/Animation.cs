@@ -103,6 +103,8 @@ namespace Motion
             Delay = 0;
             LoopsCount = 1;
             LoopType = LoopType.Restart;
+            Interval = 0;
+            IntervalDelay = 0;
             Time = 0;
             Loop = 0;
             
