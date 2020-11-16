@@ -147,7 +147,7 @@ namespace Motion
         public static QuaternionTween Tween(Func<Quaternion> getter, Action<Quaternion> setter,
             Quaternion target) => To<Quaternion, QuaternionTween>(getter, setter, target);
 
-        public static A To<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct where A : Animation<T>, new()
+        public static A To<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : Animation<T>, new()
         {
             var animation = Instance.GetFromPool<A>();
             animation.Setup(getter, setter, target);

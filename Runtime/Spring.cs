@@ -1,5 +1,8 @@
-﻿namespace Motion
+﻿using System;
+
+namespace Motion
 {
+    [Serializable]
     public struct Spring
     {
         public float stiffness;

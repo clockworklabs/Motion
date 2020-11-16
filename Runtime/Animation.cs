@@ -166,7 +166,7 @@ namespace Motion
         protected abstract bool Tick(float deltaTime);
     }
     
-    public abstract class Animation<T> : Animation where T : struct
+    public abstract class Animation<T> : Animation where T : struct, IEquatable<T>
     {
         protected Func<T> Getter { get; private set; }
         protected Action<T> Setter { get; private set; }

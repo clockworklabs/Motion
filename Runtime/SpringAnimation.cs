@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Motion
 {
-    public abstract class SpringAnimation<T> : Animation<T> where T : struct
+    public abstract class SpringAnimation<T> : Animation<T> where T : struct, IEquatable<T>
     {
         private Spring spring;
         public Spring Spring

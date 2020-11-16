@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Motion
 {
-    public abstract class TweenAnimation<T> : Animation<T> where T : struct
+    public abstract class TweenAnimation<T> : Animation<T> where T : struct, IEquatable<T>
     {
         private const float C1 = 1.70158f;
         private const float C2 = C1 * 1.525f;

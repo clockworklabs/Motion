@@ -1,5 +1,9 @@
-﻿namespace Motion
+﻿using System;
+
+namespace Motion
 {    
+    
+    [Serializable]
     public struct Tween
     {
         public Ease ease;
