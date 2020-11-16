@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Collections;
 
 namespace Motion
@@ -6,6 +7,13 @@ namespace Motion
     public class GroupAnimation : Animation
     {
         private List<Animation> Animations { get; } = new List<Animation>();
+
+        public GroupAnimation OnComplete(Action callback)
+        {
+            OnCompleteCallback = callback;
+            
+            return this;
+        }
 
         internal override void Reset()
         {
@@ -48,8 +56,15 @@ namespace Motion
                     Animations.RemoveAtSwapBack(i);
                 }
             }
-            
-            return Animations.Count == 0;
+
+            var completed = Animations.Count == 0;
+
+            if (completed)
+            {
+                OnCompleteCallback?.Invoke();
+            }
+
+            return completed;
         }
     }
 }
