@@ -11,6 +11,11 @@ namespace Motion
         public GroupAnimation SetOwner(object owner)
         {
             Owner = owner;
+            for (var i = Animations.Count - 1; i >= 0; i--)
+            {
+                var animation = Animations[i];
+                animation.Owner = owner;
+            }
 
             return this;
         }
@@ -29,7 +34,7 @@ namespace Motion
             for (var i = Animations.Count - 1; i >= 0; i--)
             {
                 var animation = Animations[i];
-                DoMotion.Stop(animation.ID);
+                DoMotion.Stop(animation.ID, Owner);
             }
             
             Animations.Clear();
