@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
@@ -6,14 +7,42 @@ namespace Motion
     {
         private static uint nextId;
 
-        public Action OnLoopCallback { get; protected set; }
-        public Action OnIntervalCallback { get; protected set; }
-        public Action OnCompleteCallback { get; protected set; }
-        
         public uint ID { get; }
-        
+
         public bool Playing { get; private set; }
         public bool Completed { get; private set; }
+        
+        private Action onLoopCallback;
+        public Action OnLoopCallback
+        {
+            get => onLoopCallback;
+            protected set
+            {
+                if (Playing) return;
+                
+                onLoopCallback = value;
+            }
+        }
+        private Action onIntervalCallback;
+        public Action OnIntervalCallback {
+            get => onIntervalCallback;
+            protected set
+            {
+                if (Playing) return;
+                
+                onIntervalCallback = value;
+            }
+        }
+        private Action onCompleteCallback;
+        public Action OnCompleteCallback {
+            get => onCompleteCallback;
+            protected set
+            {
+                if (Playing) return;
+                
+                onCompleteCallback = value;
+            }
+        }
 
         private bool manualStep;
         internal bool ManualStep
@@ -99,17 +128,20 @@ namespace Motion
         {
             Playing = false;
             Completed = false;
+            
+            OnLoopCallback = null;
+            OnIntervalCallback = null;
+            OnCompleteCallback = null;
+            
             ManualStep = false;
             Delay = 0;
             LoopsCount = 1;
             LoopType = LoopType.Restart;
             Interval = 0;
             IntervalDelay = 0;
+            
             Time = 0;
             Loop = 0;
-            
-            OnLoopCallback = null;
-            OnCompleteCallback = null;
         }
 
         internal void Step(float deltaTime)
