@@ -51,7 +51,7 @@ namespace Motion
 
                 if (animation.Completed)
                 {
-                    ReturnToPool(i);
+                    ReturnToPool(i, animation.Owner);
                 }
             }
         }
@@ -81,22 +81,22 @@ namespace Motion
             return animation;
         }
 
-        private void ReturnToPool(uint id)
+        private void ReturnToPool(uint id, object owner = null)
         {
             if (!ActiveIds.Contains(id)) return;
             
             var index = ActiveAnimations.FindIndex(anim => anim.ID == id);
-            ReturnToPool(index);
+            ReturnToPool(index, owner);
         }
 
-        private void ReturnToPool(int index)
+        private void ReturnToPool(int index, object owner = null)
         {
-            if (index < 0 || index >= ActiveAnimations.Count)
-            {
-                return;
-            }
+            if (index < 0 || index >= ActiveAnimations.Count) return;
             
             var animation = ActiveAnimations[index];
+
+            if (animation.Owner != null && animation.Owner != owner) return;
+            
             var type = animation.GetType();
             
             ActiveIds.Remove(animation.ID);
@@ -163,9 +163,9 @@ namespace Motion
             return animation;
         }
 
-        public static void Stop(uint id)
+        public static void Stop(uint id, object owner = null)
         {
-            Instance.ReturnToPool(id);
+            Instance.ReturnToPool(id, owner);
         }
     }
 }

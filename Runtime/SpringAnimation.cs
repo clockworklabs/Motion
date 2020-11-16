@@ -30,6 +30,13 @@ namespace Motion
             Accum = 0;
         }
 
+        public SpringAnimation<T> SetOwner(object owner)
+        {
+            Owner = owner;
+
+            return this;
+        }
+
         public SpringAnimation<T> SetDelay(float delay)
         {
             Delay = delay;

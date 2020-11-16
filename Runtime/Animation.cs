@@ -11,6 +11,18 @@ namespace Motion
 
         public bool Playing { get; private set; }
         public bool Completed { get; private set; }
+
+        private object owner;
+        protected internal object Owner
+        {
+            get => owner;
+            set
+            {
+                if (Playing) return;
+
+                owner = value;
+            }
+        }
         
         private Action onLoopCallback;
         public Action OnLoopCallback
@@ -128,6 +140,8 @@ namespace Motion
         {
             Playing = false;
             Completed = false;
+
+            Owner = null;
             
             OnLoopCallback = null;
             OnIntervalCallback = null;

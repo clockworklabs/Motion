@@ -8,6 +8,13 @@ namespace Motion
     {
         private List<Animation> Animations { get; } = new List<Animation>();
 
+        public GroupAnimation SetOwner(object owner)
+        {
+            Owner = owner;
+
+            return this;
+        }
+
         public GroupAnimation OnComplete(Action callback)
         {
             OnCompleteCallback = callback;

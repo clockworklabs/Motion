@@ -52,6 +52,13 @@ namespace Motion
             Accum = 0;
         }
 
+        public TweenAnimation<T> SetOwner(object owner)
+        {
+            Owner = owner;
+
+            return this;
+        }
+
         public TweenAnimation<T> SetDelay(float delay)
         {
             Delay = delay;
