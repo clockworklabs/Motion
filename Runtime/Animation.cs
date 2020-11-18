@@ -138,8 +138,6 @@ namespace Motion
 
         internal virtual void Reset()
         {
-            Debug.Log("RESET");
-            
             Playing = false;
             Completed = false;
 
@@ -171,8 +169,18 @@ namespace Motion
             {
                 return;
             }
-            
-            if (Tick(deltaTime))
+
+            var result = Tick(deltaTime);
+
+            if (result.loop)
+            {
+                OnLoopCallback?.Invoke();
+            }
+            if (result.interval)
+            {
+                OnIntervalCallback?.Invoke();
+            }
+            if (result.complete)
             {
                 Playing = false;
                 Completed = true;
@@ -181,7 +189,7 @@ namespace Motion
             }
         }
 
-        protected abstract bool Tick(float deltaTime);
+        protected abstract TickResult Tick(float deltaTime);
     }
     
     public abstract class Animation<T> : Animation where T : struct, IEquatable<T>

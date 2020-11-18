@@ -111,10 +111,13 @@ namespace Motion
             return this;
         }
 
-        protected override bool Tick(float deltaTime) {
+        protected override TickResult Tick(float deltaTime) {
             if (LoopsCount == 0)
             {
-                return true;
+                return new TickResult
+                {
+                    complete = true
+                };
             }
 
             if (IsInterval)
@@ -122,7 +125,7 @@ namespace Motion
                 if (Accum < IntervalDelay)
                 {
                     Accum += deltaTime;
-                    return false;
+                    return new TickResult();
                 }
 
                 IsInterval = false;
@@ -139,12 +142,13 @@ namespace Motion
                 if (LoopsCount > 0 && Loop >= LoopsCount)
                 {
                     Setter(Target);
-                    OnLoopCallback?.Invoke();
-                    if (IsInterval)
+
+                    return new TickResult
                     {
-                        OnIntervalCallback?.Invoke();
-                    }
-                    return true;
+                        loop = true,
+                        interval = IsInterval,
+                        complete = true
+                    };
                 }
                 
                 if (LoopType == LoopType.PingPong)
@@ -153,13 +157,12 @@ namespace Motion
                 }
 
                 Setter(Origin);
-                OnLoopCallback?.Invoke();
-                if (IsInterval)
+
+                return new TickResult
                 {
-                    OnIntervalCallback?.Invoke();
-                }
-                
-                return false;
+                    loop = true,
+                    interval = IsInterval
+                };
             }
 
             float t;
@@ -363,13 +366,16 @@ namespace Motion
                 }
                 default:
                     Setter(Target);
-                    return true;
+                    return new TickResult
+                    {
+                        complete = true
+                    };
             }
 
             var value = LinearInterpolation(Origin, Target, t);
             Setter(value);
             
-            return false;
+            return new TickResult();
         }
 
         protected abstract T LinearInterpolation(T a, T b, float t);

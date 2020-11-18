@@ -55,7 +55,7 @@ namespace Motion
             }
         }
 
-        protected override bool Tick(float deltaTime)
+        protected override TickResult Tick(float deltaTime)
         {
             for (var i = Animations.Count - 1; i >= 0; i--)
             {
@@ -69,7 +69,10 @@ namespace Motion
                 }
             }
 
-            return Animations.Count == 0;
+            return new TickResult
+            {
+                complete = Animations.Count == 0
+            };
         }
     }
 }
