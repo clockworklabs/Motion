@@ -129,7 +129,6 @@ namespace Motion
                     {
                         OnIntervalCallback?.Invoke();
                     }
-                    OnCompleteCallback?.Invoke();
                     return true;
                 }
                 

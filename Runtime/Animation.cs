@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
@@ -137,6 +138,8 @@ namespace Motion
 
         internal virtual void Reset()
         {
+            Debug.Log("RESET");
+            
             Playing = false;
             Completed = false;
 
@@ -168,11 +171,13 @@ namespace Motion
             {
                 return;
             }
-
+            
             if (Tick(deltaTime))
             {
                 Playing = false;
                 Completed = true;
+                
+                OnCompleteCallback?.Invoke();
             }
         }
 

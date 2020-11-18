@@ -69,14 +69,7 @@ namespace Motion
                 }
             }
 
-            var completed = Animations.Count == 0;
-
-            if (completed)
-            {
-                OnCompleteCallback?.Invoke();
-            }
-
-            return completed;
+            return Animations.Count == 0;
         }
     }
 }

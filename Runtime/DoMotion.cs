@@ -64,11 +64,14 @@ namespace Motion
                 freeStack = new Stack<Animation>();
                 FreeAnimations[type] = freeStack;
             }
+            
+            Debug.Log(freeStack.Count);
 
             T animation;
             if (freeStack.Count > 0)
             {
                 animation = (T) freeStack.Pop();
+                animation.Reset();
             }
             else
             {
@@ -103,7 +106,6 @@ namespace Motion
             ActiveAnimations.RemoveAtSwapBack(index);
             if (FreeAnimations.TryGetValue(type, out var freeStack))
             {
-                animation.Reset();
                 freeStack.Push(animation);
             }
         }
