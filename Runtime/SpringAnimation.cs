@@ -11,7 +11,7 @@ namespace Motion
             get => spring;
             private set
             {
-                if (Playing) return;
+                if (Started) return;
 
                 spring = value;
             }
@@ -30,36 +30,6 @@ namespace Motion
             Accum = 0;
         }
 
-        public SpringAnimation<T> SetOwner(object owner)
-        {
-            Owner = owner;
-
-            return this;
-        }
-
-        public SpringAnimation<T> SetDelay(float delay)
-        {
-            Delay = delay;
-
-            return this;
-        }
-
-        public SpringAnimation<T> SetLoops(int loops, LoopType loopType = LoopType.Restart)
-        {
-            LoopsCount = loops;
-            LoopType = loopType;
-
-            return this;
-        }
-
-        public SpringAnimation<T> SetInterval(int interval, float delay = 0)
-        {
-            Interval = interval;
-            IntervalDelay = delay;
-
-            return this;
-        }
-
         public SpringAnimation<T> SetSpring(Spring spring)
         {
             Spring = spring;
@@ -69,30 +39,18 @@ namespace Motion
 
         public SpringAnimation<T> SetInitialVelocity(T velocity)
         {
+            if (Started) return this;
+            
             Velocity = velocity;
 
             return this;
         }
 
-        public SpringAnimation<T> OnLoop(Action callback)
+        protected override void OnStop(bool complete)
         {
-            OnLoopCallback = callback;
+            if (!complete) return;
 
-            return this;
-        }
-
-        public SpringAnimation<T> OnInterval(Action callback)
-        {
-            OnIntervalCallback = callback;
-
-            return this;
-        }
-
-        public SpringAnimation<T> OnComplete(Action callback)
-        {
-            OnCompleteCallback = callback;
-
-            return this;
+            Setter(Target);
         }
 
         protected override TickResult Tick(float deltaTime) {

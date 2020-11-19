@@ -19,7 +19,7 @@ namespace Motion
             get => inverseDuration;
             set
             {
-                if (Playing) return;
+                if (Started) return;
                 inverseDuration = value;
             }
         }
@@ -32,7 +32,7 @@ namespace Motion
             get => ease;
             private set
             {
-                if (Playing) return;
+                if (Started) return;
                 
                 ease = value;
             }
@@ -52,36 +52,6 @@ namespace Motion
             Accum = 0;
         }
 
-        public TweenAnimation<T> SetOwner(object owner)
-        {
-            Owner = owner;
-
-            return this;
-        }
-
-        public TweenAnimation<T> SetDelay(float delay)
-        {
-            Delay = delay;
-
-            return this;
-        }
-
-        public TweenAnimation<T> SetLoops(int loops, LoopType loopType = LoopType.Restart)
-        {
-            LoopsCount = loops;
-            LoopType = loopType;
-
-            return this;
-        }
-
-        public TweenAnimation<T> SetInterval(int interval, float delay = 0)
-        {
-            Interval = interval;
-            IntervalDelay = delay;
-
-            return this;
-        }
-
         public TweenAnimation<T> SetTween(Tween tween)
         {
             Ease = tween.ease;
@@ -90,25 +60,11 @@ namespace Motion
             return this;
         }
 
-        public TweenAnimation<T> OnLoop(Action callback)
+        protected override void OnStop(bool complete)
         {
-            OnLoopCallback = callback;
+            if (!complete) return;
 
-            return this;
-        }
-
-        public TweenAnimation<T> OnInterval(Action callback)
-        {
-            OnIntervalCallback = callback;
-
-            return this;
-        }
-
-        public TweenAnimation<T> OnComplete(Action callback)
-        {
-            OnCompleteCallback = callback;
-
-            return this;
+            Setter(Target);
         }
 
         protected override TickResult Tick(float deltaTime) {

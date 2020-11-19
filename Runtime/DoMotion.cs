@@ -43,15 +43,17 @@ namespace Motion
             for (var i = ActiveAnimations.Count - 1; i >= 0; i--)
             {
                 var animation = ActiveAnimations[i];
-                
-                if (!animation.ManualStep)
-                {
-                    animation.Step(Time.deltaTime);
-                }
 
-                if (animation.Completed)
+                if (!animation.Started && animation.AutoPlay)
                 {
-                    ReturnToPool(i, animation.Owner);
+                    animation.Play();
+                }
+                
+                animation.Step(Time.deltaTime);
+
+                if (!animation.Active)
+                {
+                    ReturnToPool(i);
                 }
             }
         }
@@ -76,27 +78,18 @@ namespace Motion
                 animation = new T();
                 animation.Reset();
             }
+            
             ActiveIds.Add(animation.ID);
             ActiveAnimations.Add(animation);
             
             return animation;
         }
 
-        private void ReturnToPool(uint id, object owner = null)
-        {
-            if (!ActiveIds.Contains(id)) return;
-            
-            var index = ActiveAnimations.FindIndex(anim => anim.ID == id);
-            ReturnToPool(index, owner);
-        }
-
-        private void ReturnToPool(int index, object owner = null)
+        private void ReturnToPool(int index)
         {
             if (index < 0 || index >= ActiveAnimations.Count) return;
             
             var animation = ActiveAnimations[index];
-
-            if (animation.Owner != null && animation.Owner != owner) return;
             
             var type = animation.GetType();
             
@@ -151,6 +144,10 @@ namespace Motion
         {
             var animation = Instance.GetFromPool<A>();
             animation.Setup(getter, setter, target);
+            if(!animation.Valid)
+            {
+                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
+            }
             
             return animation;
         }
@@ -159,13 +156,12 @@ namespace Motion
         {
             var animation = Instance.GetFromPool<GroupAnimation>();
             animation.Setup(animations);
+            if(!animation.Valid)
+            {
+                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
+            }
             
             return animation;
-        }
-
-        public static void Stop(uint id, object owner = null)
-        {
-            Instance.ReturnToPool(id, owner);
         }
     }
 }

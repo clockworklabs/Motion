@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Motion
 {
@@ -9,28 +8,136 @@ namespace Motion
 
         public uint ID { get; }
 
-        public bool Playing { get; private set; }
-        public bool Completed { get; private set; }
+        private bool started;
+        public bool Started
+        {
+            get => started;
+            private set
+            {
+                if (started == value) return;
+                
+                started = value;
+                if (value)
+                {
+                    OnStartCallback?.Invoke();
+                }
+            }
+        }
+        private bool playing;
+        public bool Playing
+        {
+            get => playing;
+            private set
+            {
+                if (playing == value) return;
+                
+                playing = value;
+                if (value)
+                {
+                    OnPlayCallback?.Invoke();
+                }
+            }
+        }
+        private bool stopped;
+        public bool Stopped
+        {
+            get => stopped;
+            private set
+            {
+                if (stopped == value) return;
+                
+                stopped = value;
+                if (value)
+                {
+                    OnStopCallback?.Invoke();
+                }
+            }
+        }
+        private bool completed;
+        public bool Completed
+        {
+            get => completed;
+            private set
+            {
+                if (completed == value) return;
+                
+                completed = value;
+                if (value)
+                {
+                    OnCompleteCallback?.Invoke();
+                }
+            }
+        }
+
+        public bool Active => Valid && !Completed && !Stopped;
+        public bool Paused => Active && Started && !Playing;
+        
+        public bool Valid { get; protected set; }
+
+        private bool autoPlay;
+        public bool AutoPlay
+        {
+            get => autoPlay;
+            protected set
+            {
+                if (Started) return;
+
+                autoPlay = value;
+            }
+        }
 
         private object owner;
-        protected internal object Owner
+        public object Owner
         {
             get => owner;
-            set
+            protected set
             {
-                if (Playing) return;
+                if (Started) return;
 
                 owner = value;
             }
         }
         
+        private Action onStartCallback;
+        public Action OnStartCallback
+        {
+            get => onStartCallback;
+            protected set
+            {
+                if (Started) return;
+                
+                onStartCallback = value;
+            }
+        }
+        private Action onPlayCallback;
+        public Action OnPlayCallback
+        {
+            get => onPlayCallback;
+            protected set
+            {
+                if (Started) return;
+                
+                onPlayCallback = value;
+            }
+        }
+        private Action onPauseCallback;
+        public Action OnPauseCallback
+        {
+            get => onPauseCallback;
+            protected set
+            {
+                if (Started) return;
+                
+                onPauseCallback = value;
+            }
+        }
         private Action onLoopCallback;
         public Action OnLoopCallback
         {
             get => onLoopCallback;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
                 
                 onLoopCallback = value;
             }
@@ -40,9 +147,20 @@ namespace Motion
             get => onIntervalCallback;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
                 
                 onIntervalCallback = value;
+            }
+        }
+        private Action onStopCallback;
+        public Action OnStopCallback
+        {
+            get => onStopCallback;
+            protected set
+            {
+                if (Started) return;
+                
+                onStopCallback = value;
             }
         }
         private Action onCompleteCallback;
@@ -50,21 +168,9 @@ namespace Motion
             get => onCompleteCallback;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
                 
                 onCompleteCallback = value;
-            }
-        }
-
-        private bool manualStep;
-        internal bool ManualStep
-        {
-            get => manualStep;
-            set
-            {
-                if (Playing) return;
-                
-                manualStep = value;
             }
         }
 
@@ -74,7 +180,7 @@ namespace Motion
             get => delay;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
                 
                 delay = value;
             }
@@ -86,7 +192,7 @@ namespace Motion
             get => loopsCount;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
 
                 loopsCount = value;
             }
@@ -98,7 +204,7 @@ namespace Motion
             get => loopType;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
                 
                 loopType = value;
             }
@@ -110,7 +216,7 @@ namespace Motion
             get => interval;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
 
                 interval = value;
             }
@@ -122,7 +228,7 @@ namespace Motion
             get => intervalDelay;
             protected set
             {
-                if (Playing) return;
+                if (Started) return;
                 
                 intervalDelay = value;
             }
@@ -136,18 +242,112 @@ namespace Motion
             ID = nextId++;
         }
 
+        public virtual Animation SetAutoPlay(bool autoPlay)
+        {
+            AutoPlay = autoPlay;
+
+            return this;
+        }
+
+        public virtual Animation SetOwner(object owner)
+        {
+            Owner = owner;
+
+            return this;
+        }
+
+        public virtual Animation OnStart(Action callback)
+        {
+            OnStartCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation OnPlay(Action callback)
+        {
+            OnPlayCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation OnPause(Action callback)
+        {
+            OnPauseCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation OnLoop(Action callback)
+        {
+            OnLoopCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation OnInterval(Action callback)
+        {
+            OnIntervalCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation OnStop(Action callback)
+        {
+            OnStopCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation OnComplete(Action callback)
+        {
+            OnCompleteCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation SetDelay(float delay)
+        {
+            Delay = delay;
+
+            return this;
+        }
+
+        public virtual Animation SetLoops(int loops, LoopType loopType = LoopType.Restart)
+        {
+            LoopsCount = loops;
+            LoopType = loopType;
+
+            return this;
+        }
+
+        public virtual Animation SetInterval(int interval, float delay = 0)
+        {
+            Interval = interval;
+            IntervalDelay = delay;
+
+            return this;
+        }
+
         internal virtual void Reset()
         {
-            Playing = false;
-            Completed = false;
-
-            Owner = null;
-            
+            OnStartCallback = null;
+            OnPlayCallback = null;
+            OnPauseCallback = null;
             OnLoopCallback = null;
             OnIntervalCallback = null;
+            OnStopCallback = null;
             OnCompleteCallback = null;
             
-            ManualStep = false;
+            Started = false;
+            Playing = false;
+            Stopped = false;
+            Completed = false;
+            Valid = true;
+
+            AutoPlay = true;
+            
+            Owner = null;
+            
             Delay = 0;
             LoopsCount = 1;
             LoopType = LoopType.Restart;
@@ -158,11 +358,42 @@ namespace Motion
             Loop = 0;
         }
 
+        public virtual void Play()
+        {
+            Started = true;
+            Playing = true;
+        }
+        
+        public virtual void Pause()
+        {
+            Playing = false;
+        }
+
+        public void Stop(bool complete) => Stop(complete, null);
+        public void Stop(object owner) => Stop(false, owner);
+        public virtual void Stop(bool complete = false, object owner = null)
+        {
+            if (!Active) return;
+            if (Owner != null && Owner != owner) return;
+            
+            OnStop(complete);
+
+            Playing = false;
+            Stopped = true;
+
+            if (complete)
+            {
+                Completed = true;
+            }
+        }
+
+        protected abstract void OnStop(bool complete);
+
         internal void Step(float deltaTime)
         {
-            if (Completed) return;
+            if (!Active) return;
 
-            Playing = true;
+            if (Paused) return;
 
             Time += deltaTime;
             if (Time < Delay)
@@ -182,10 +413,7 @@ namespace Motion
             }
             if (result.complete)
             {
-                Playing = false;
                 Completed = true;
-                
-                OnCompleteCallback?.Invoke();
             }
         }
 
@@ -211,11 +439,17 @@ namespace Motion
         
         internal void Setup(Func<T> getter, Action<T> setter, T target)
         {
-            Getter = getter;
-            Setter = setter;
-
             Origin = getter();
             Target = target;
+
+            if (Origin.Equals(Target))
+            {
+                Valid = false;
+                return;
+            }
+            
+            Getter = getter;
+            Setter = setter;
 
             Setup();
         }
