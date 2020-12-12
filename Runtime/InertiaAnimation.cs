@@ -52,30 +52,6 @@ namespace Motion
                 max = Mathf.Clamp(value, min, float.MaxValue);
             }
         }
-
-        private float minLimit;
-        public float MinLimit
-        {
-            get => minLimit;
-            private set
-            {
-                if (Started) return;
-
-                minLimit = Mathf.Min(Min, value);
-            }
-        }
-
-        private float maxLimit;
-        public float MaxLimit
-        {
-            get => maxLimit;
-            private set
-            {
-                if (Started) return;
-
-                maxLimit = Mathf.Max(Max, value);
-            }
-        }
         
         private SpringAnimation<float> SpringAnimation { get; set; }
         
@@ -94,8 +70,6 @@ namespace Motion
             InitialVelocity = 0;
             Min = float.MinValue;
             Max = float.MaxValue;
-            MinLimit = float.MinValue;
-            MaxLimit = float.MaxValue;
 
             SpringAnimation = null;
             IsInterval = false;
@@ -116,18 +90,16 @@ namespace Motion
             return this;
         }
 
-        public InertiaAnimation SetMinBoundary(float boundary, float limit = float.MinValue)
+        public InertiaAnimation SetMinBoundary(float boundary)
         {
             Min = boundary;
-            MinLimit = limit;
 
             return this;
         }
 
-        public InertiaAnimation SetMaxBoundary(float boundary, float limit = float.MaxValue)
+        public InertiaAnimation SetMaxBoundary(float boundary)
         {
             Max = boundary;
-            MaxLimit = limit;
 
             return this;
         }
@@ -138,28 +110,6 @@ namespace Motion
             
             SetMinBoundary(min);
             SetMaxBoundary(max);
-
-            return this;
-        }
-
-        public InertiaAnimation SetBoundaries(float min, float max, float limitRatio)
-        {
-            if(min > max) throw new UnityException("min must be smaller than max");
-            
-            var length = max - min;
-            var limitSize = length * limitRatio;
-            SetMinBoundary(min, min - limitSize);
-            SetMaxBoundary(max, max + limitSize);
-
-            return this;
-        }
-
-        public InertiaAnimation SetBoundaries(float min, float max, float minLimit, float maxLimit)
-        {
-            if(min > max) throw new UnityException("min must be smaller than max");
-            
-            SetMinBoundary(min, minLimit);
-            SetMaxBoundary(max, maxLimit);
 
             return this;
         }
@@ -252,25 +202,8 @@ namespace Motion
             var t = Mathf.InverseLerp(Target, Origin, value);
             var velocity = InitialVelocity * Mathf.Pow(t, Inertia.power);
             
-            float multiplier;
-            if (velocity < 0 && value < Min && MinLimit > float.MinValue)
-            {
-                var mt = 1 - Mathf.InverseLerp(MinLimit, Min, value);
-                multiplier = Mathf.Clamp01(1 - mt * mt);
-            } else if (velocity > 0 && value > Max && MaxLimit < float.MaxValue)
-            {
-                var mt = Mathf.InverseLerp(Max, MaxLimit, value);
-                multiplier = Mathf.Clamp01(1 - mt * mt);
-            }
-            else
-            {
-                multiplier = 1f;
-            }
-
-            velocity *= multiplier;
-
-            value = Mathf.Clamp(value + velocity * deltaTime, MinLimit, MaxLimit);
-
+            value += velocity * deltaTime;
+            
             Setter(value);
 
             if (value < Min)
