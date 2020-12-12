@@ -442,7 +442,7 @@ namespace Motion
             Origin = getter();
             Target = target;
 
-            if (Origin.Equals(Target))
+            if (!Check())
             {
                 Valid = false;
                 return;
@@ -453,6 +453,8 @@ namespace Motion
 
             Setup();
         }
+
+        protected abstract bool Check();
 
         protected abstract void Setup();
 

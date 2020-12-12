@@ -43,6 +43,8 @@ namespace Motion
         private bool IsInterval { get; set; }
         private float Accum { get; set; }
         
+        protected override bool Check() => !Origin.Equals(Target);
+        
         protected override void Setup()
         {
             SetTween(Tween.Default);
