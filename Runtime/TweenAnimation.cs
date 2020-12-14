@@ -40,9 +40,6 @@ namespace Motion
 
         private float Time { get; set; }
         
-        private bool IsInterval { get; set; }
-        private float Accum { get; set; }
-        
         protected override bool Check() => !Origin.Equals(Target);
         
         protected override void Setup()
@@ -50,8 +47,6 @@ namespace Motion
             SetTween(Tween.Default);
 
             Time = 0;
-            IsInterval = false;
-            Accum = 0;
         }
 
         public TweenAnimation<T> SetTween(Tween tween)
@@ -62,65 +57,12 @@ namespace Motion
             return this;
         }
 
-        protected override void OnStop(bool complete)
-        {
-            if (!complete) return;
-
-            Setter(Target);
-        }
-
-        protected override TickResult Tick(float deltaTime) {
-            if (LoopsCount == 0)
-            {
-                return new TickResult
-                {
-                    complete = true
-                };
-            }
-
-            if (IsInterval)
-            {
-                if (Accum < IntervalDelay)
-                {
-                    Accum += deltaTime;
-                    return new TickResult();
-                }
-
-                IsInterval = false;
-                Accum = 0;
-            }
-
+        protected override bool Tick(float deltaTime, ref T value) {
             Time = Mathf.Clamp01(Time + deltaTime * InverseDuration);
             
             if (Time >= 1)
             {
-                Loop++;
-                IsInterval = Interval > 0 && Loop % Interval == 0;
-                
-                if (LoopsCount > 0 && Loop >= LoopsCount)
-                {
-                    Setter(Target);
-
-                    return new TickResult
-                    {
-                        loop = true,
-                        interval = IsInterval,
-                        complete = true
-                    };
-                }
-                
-                if (LoopType == LoopType.PingPong)
-                {
-                    SwapOriginAndTarget();
-                }
-
-                Setter(Origin);
-
-                return new TickResult
-                {
-                    loop = true,
-                    interval = IsInterval
-                };
+                return true;
             }
 
             float t;
@@ -323,17 +265,12 @@ namespace Motion
                     break;
                 }
                 default:
-                    Setter(Target);
-                    return new TickResult
-                    {
-                        complete = true
-                    };
+                    return true;
             }
 
-            var value = LinearInterpolation(Origin, Target, t);
-            Setter(value);
-            
-            return new TickResult();
+            value = LinearInterpolation(Origin, Target, t);
+
+            return false;
         }
 
         protected abstract T LinearInterpolation(T a, T b, float t);

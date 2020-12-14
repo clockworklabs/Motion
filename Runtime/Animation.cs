@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
@@ -422,11 +423,14 @@ namespace Motion
     
     public abstract class Animation<T> : Animation where T : struct, IEquatable<T>
     {
-        protected Func<T> Getter { get; private set; }
-        protected Action<T> Setter { get; private set; }
+        private Func<T> Getter { get; set; }
+        private Action<T> Setter { get; set; }
         
         protected T Origin { get; private set; }
         protected T Target { get; private set; }
+        
+        private bool IsInterval { get; set; }
+        private float Accum { get; set; }
         
         internal override void Reset()
         {
@@ -435,6 +439,8 @@ namespace Motion
             Setter = null;
             Origin = default;
             Target = default;
+            IsInterval = false;
+            Accum = 0;
         }
         
         internal void Setup(Func<T> getter, Action<T> setter, T target)
@@ -464,5 +470,74 @@ namespace Motion
             Origin = Target;
             Target = temp;
         }
+
+        protected override void OnStop(bool complete)
+        {
+            if (!complete) return;
+
+            Setter(Target);
+        }
+
+        protected override TickResult Tick(float deltaTime)
+        {            
+            if (LoopsCount == 0)
+            {
+                return new TickResult
+                {
+                    complete = true
+                };
+            }
+
+            if (IsInterval)
+            {
+                if (Accum < IntervalDelay)
+                {
+                    Accum += deltaTime;
+                    return new TickResult();
+                }
+
+                IsInterval = false;
+                Accum = 0;
+            }
+
+            var value = Getter();
+            var done = Tick(deltaTime, ref value);
+            
+            if (!done)
+            {
+                Setter(value);
+                return new TickResult();
+            }
+            
+            Loop++;
+            IsInterval = Interval > 0 && Loop % Interval == 0;
+
+            if (LoopsCount > 0 && Loop >= LoopsCount)
+            {
+                Setter(Target);
+                    
+                return new TickResult
+                {
+                    loop = true,
+                    interval = IsInterval,
+                    complete = true
+                };
+            }
+                
+            if (LoopType == LoopType.PingPong)
+            {
+                SwapOriginAndTarget();
+            }
+                
+            Setter(Origin);
+
+            return new TickResult
+            {
+                loop = true,
+                interval = IsInterval
+            };
+        }
+
+        protected abstract bool Tick(float deltaTime, ref T value);
     }
 }

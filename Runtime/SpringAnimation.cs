@@ -19,9 +19,6 @@ namespace Motion
         
         public T Velocity { get; private set; }
         
-        private bool IsInterval { get; set; }
-        private float Accum { get; set; }
-        
         protected override bool Check() => !Origin.Equals(Target);
 
         protected override void Setup()
@@ -29,9 +26,6 @@ namespace Motion
             SetSpring(Spring.Default);
 
             Velocity = default;
-            
-            IsInterval = false;
-            Accum = 0;
         }
 
         public SpringAnimation<T> SetSpring(Spring spring)
@@ -50,66 +44,12 @@ namespace Motion
             return this;
         }
 
-        protected override void OnStop(bool complete)
-        {
-            if (!complete) return;
-
-            Setter(Target);
-        }
-
-        protected override TickResult Tick(float deltaTime) {
-            if (LoopsCount == 0)
-            {
-                return new TickResult
-                {
-                    complete = true
-                };
-            }
-
-            if (IsInterval)
-            {
-                if (Accum < IntervalDelay)
-                {
-                    Accum += deltaTime;
-                    return new TickResult();
-                }
-
-                IsInterval = false;
-                Accum = 0;
-            }
-
+        protected override bool Tick(float deltaTime, ref T value) {
             // Object position and velocity.
-            var value = Getter();
             var delta = Subtract(value, Target);
             if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && SqrMagnitude(delta) < Spring.sqrRestDelta)
             {
-                Loop++;
-                IsInterval = Interval > 0 && Loop % Interval == 0;
-
-                if (LoopsCount > 0 && Loop >= LoopsCount)
-                {
-                    Setter(Target);
-                    
-                    return new TickResult
-                    {
-                        loop = true,
-                        interval = IsInterval,
-                        complete = true
-                    };
-                }
-                
-                if (LoopType == LoopType.PingPong)
-                {
-                    SwapOriginAndTarget();
-                }
-                
-                Setter(Origin);
-
-                return new TickResult
-                {
-                    loop = true,
-                    interval = IsInterval
-                };
+                return true;
             }
             
             // Spring stiffness, in kg / s^2
@@ -122,10 +62,8 @@ namespace Motion
             var a = Multiply(Add(fSpring, fDamping), Spring.inverseMass);
             Velocity = Add(Velocity, Multiply(a, deltaTime));
             value = Add(value, Multiply(Velocity, deltaTime));
-            
-            Setter(value);
-            
-            return new TickResult();
+
+            return false;
         }
 
         protected abstract T Add(T a, T b);

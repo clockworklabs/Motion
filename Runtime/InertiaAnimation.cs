@@ -3,8 +3,32 @@ using UnityEngine;
 
 namespace Motion
 {
-    public class InertiaAnimation : Animation<float>
+    public abstract class InertiaAnimation<T> : Animation<T> where T : struct, IEquatable<T>
     {
+        protected abstract int Dimensions { get; }
+        protected abstract T Zero { get; }
+        protected abstract T MinValue { get; }
+        protected abstract T MaxValue { get; }
+        protected abstract float Get(T value, int dimension);
+        protected abstract void Set(ref T value, int dimension, float component);
+
+        internal T GetTarget(T origin, T initialVelocity)
+        {
+            T target = default;
+            for (int i = 0, n = Dimensions; i < n; i++)
+            {
+                var cOrigin = Get(origin, i);
+                var cInitialVelocity = Get(initialVelocity, i);
+                var sign = Mathf.Sign(cInitialVelocity);
+                var power = 0.8f;
+                var diff = Mathf.Pow(Mathf.Abs(cInitialVelocity), power) * sign;
+                
+                Set(ref target, i, cOrigin + diff);
+            }
+
+            return target;
+        }
+        
         private Inertia inertia;
         public Inertia Inertia
         {
@@ -17,8 +41,8 @@ namespace Motion
             }
         }
 
-        private float initialVelocity;
-        public float InitialVelocity
+        private T initialVelocity;
+        public T InitialVelocity
         {
             get => initialVelocity;
             private set
@@ -29,194 +53,161 @@ namespace Motion
             }
         }
 
-        private float min;
-        public float Min
+        private T min;
+        public T Min
         {
             get => min;
             private set
             {
                 if (Started) return;
 
-                min = Mathf.Clamp(value, float.MinValue, max);
+                min = value;
             }
         }
 
-        private float max;
-        public float Max
+        private T max;
+        public T Max
         {
             get => max;
             private set
             {
                 if (Started) return;
 
-                max = Mathf.Clamp(value, min, float.MaxValue);
+                max = value;
             }
         }
         
-        private SpringAnimation<float> SpringAnimation { get; set; }
-        
-        private bool IsInterval { get; set; }
-        private float Accum { get; set; }
+        public T Velocity { get; private set; }
 
         protected override bool Check()
         {
-            return !Mathf.Approximately(Origin, Target) || Origin < Min || Origin > Min;
+            for (int i = 0, n = Dimensions; i < n; i++)
+            {
+                var origin = Get(Origin, i);
+                var target = Get(Target, i);
+                var min = Get(Min, i);
+                var max = Get(Max, i);
+                Debug.Log($"{origin} - {target} - {min} - {max}");
+                if (!Mathf.Approximately(origin, target) || origin < min || origin > max)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected override void Setup()
         {
             SetInertia(Inertia.Default);
 
-            InitialVelocity = 0;
-            Min = float.MinValue;
-            Max = float.MaxValue;
-
-            SpringAnimation = null;
-            IsInterval = false;
-            Accum = 0;
+            InitialVelocity = Zero;
+            Velocity = Zero;
+            Min = MinValue;
+            Max = MaxValue;
         }
 
-        public InertiaAnimation SetInertia(Inertia inertia)
+        public InertiaAnimation<T> SetInertia(Inertia inertia)
         {
             Inertia = inertia;
 
             return this;
         }
 
-        public InertiaAnimation SetInitialVelocity(float velocity)
+        public InertiaAnimation<T> SetInitialVelocity(T velocity)
         {
             InitialVelocity = velocity;
+            Velocity = velocity;
 
             return this;
         }
 
-        public InertiaAnimation SetMinBoundary(float boundary)
+        public InertiaAnimation<T> SetMinBoundary(T boundary)
         {
             Min = boundary;
 
             return this;
         }
 
-        public InertiaAnimation SetMaxBoundary(float boundary)
+        public InertiaAnimation<T> SetMaxBoundary(T boundary)
         {
             Max = boundary;
 
             return this;
         }
 
-        public InertiaAnimation SetBoundaries(float min, float max)
+        public InertiaAnimation<T> SetBoundaries(T min, T max)
         {
-            if(min > max) throw new UnityException("min must be smaller than max");
-            
             SetMinBoundary(min);
             SetMaxBoundary(max);
 
             return this;
         }
+
+        protected override bool Tick(float deltaTime, ref T value) {
+            var velocity = Velocity;
+            var done = true;
+            for (int i = 0, n = Dimensions; i < n; i++)
+            {
+                done &= Animate(ref value, ref velocity, i, deltaTime);
+            }
+
+            Velocity = velocity;
+
+            return done;
+        }
+
+        private bool Animate(ref T value, ref T velocity, int dimension, float deltaTime)
+        {
+            var val = Get(value, dimension);
+            var vel = Get(velocity, dimension);
+            
+            var min = Get(Min, dimension);
+            var max = Get(Max, dimension);
+            var spring = val < min || val > max;
+
+            float target;
+            if (spring)
+            {
+                target = val < min ? min : max;
+            }
+            else
+            {
+                target = Get(Target, dimension);
+            }
+            
+            var delta = val - target;
+            if (Mathf.Abs(vel) < Inertia.restSpeed && Mathf.Abs(delta) < Inertia.restDelta)
+            {
+                return true;
+            }
+
+            if (spring)
+            {
+                var k = -Inertia.bounceStiffness;
+                // Damping constant, in kg / s
+                var d = -Inertia.bounceDamping;
         
-        public override void Play()
-        {
-            base.Play();
-
-            SpringAnimation?.Play();
-        }
-
-        public override void Pause()
-        {
-            base.Pause();
-
-            SpringAnimation?.Pause();
-        }
-
-        protected override void OnStop(bool complete)
-        {
-            SpringAnimation?.Stop(Owner);
-            
-            if (!complete) return;
-
-            Setter(Target);
-        }
-
-        protected override TickResult Tick(float deltaTime) {
-            if (LoopsCount == 0)
-            {
-                return new TickResult
-                {
-                    complete = true
-                };
+                var fSpring = delta * k;
+                var fDamping = vel * d;
+                var a = (fSpring + fDamping) * Inertia.bounceInverseMass;
+                vel += a * deltaTime;
             }
-
-            if (IsInterval)
+            else
             {
-                if (Accum < IntervalDelay)
-                {
-                    Accum += deltaTime;
-                    return new TickResult();
-                }
-
-                IsInterval = false;
-                Accum = 0;
-            }
-
-            if (SpringAnimation != null)
-            {
-                return new TickResult
-                {
-                    complete = !SpringAnimation.Active
-                };
-            }
-            
-            var value = Getter();
-            var delta = value - Target;
-            if (value >= Min && value <= Max && Mathf.Abs(InitialVelocity) < Inertia.restSpeed && Mathf.Abs(delta) < Inertia.restDelta)
-            {
-                Loop++;
-                IsInterval = Interval > 0 && Loop % Interval == 0;
-
-                if (LoopsCount > 0 && Loop >= LoopsCount)
-                {
-                    Setter(Target);
-                    
-                    return new TickResult
-                    {
-                        loop = true,
-                        interval = IsInterval,
-                        complete = true
-                    };
-                }
+                var origin = Get(Origin, dimension);
+                var initialVelocity = Get(InitialVelocity, dimension);
+                var t = Mathf.InverseLerp(target, origin, val);
                 
-                if (LoopType == LoopType.PingPong)
-                {
-                    SwapOriginAndTarget();
-                }
-                
-                Setter(Origin);
-
-                return new TickResult
-                {
-                    loop = true,
-                    interval = IsInterval
-                };
+                vel = initialVelocity * Mathf.Pow(t, Inertia.power);
             }
             
-            var t = Mathf.InverseLerp(Target, Origin, value);
-            var velocity = InitialVelocity * Mathf.Pow(t, Inertia.power);
+            val += vel * deltaTime;
             
-            value += velocity * deltaTime;
-            
-            Setter(value);
+            Set(ref velocity, dimension, vel);
+            Set(ref value, dimension, val);
 
-            if (value < Min)
-            {
-                SpringAnimation = DoMotion.Spring(Getter, Setter, Min).SetSpring(Inertia.bumpSpring).SetInitialVelocity(velocity);
-                SpringAnimation.SetOwner(Owner).Play();
-            } else if (value > Max)
-            {
-                SpringAnimation = DoMotion.Spring(Getter, Setter, Max).SetSpring(Inertia.bumpSpring).SetInitialVelocity(velocity);
-                SpringAnimation.SetOwner(Owner).Play();
-            }
-            
-            return new TickResult();
+            return false;
         }
     }
 }
