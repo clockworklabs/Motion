@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Motion
 {
@@ -49,6 +48,7 @@ namespace Motion
             var delta = Subtract(value, Target);
             if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && SqrMagnitude(delta) < Spring.sqrRestDelta)
             {
+                value = Target;
                 return true;
             }
             

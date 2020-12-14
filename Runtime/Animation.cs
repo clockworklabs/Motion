@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Motion
 {
@@ -464,7 +463,7 @@ namespace Motion
 
         protected abstract void Setup();
 
-        protected void SwapOriginAndTarget()
+        private void SwapOriginAndTarget()
         {
             var temp = Origin;
             Origin = Target;
@@ -503,9 +502,10 @@ namespace Motion
             var value = Getter();
             var done = Tick(deltaTime, ref value);
             
+            Setter(value);
+            
             if (!done)
             {
-                Setter(value);
                 return new TickResult();
             }
             
@@ -514,8 +514,6 @@ namespace Motion
 
             if (LoopsCount > 0 && Loop >= LoopsCount)
             {
-                Setter(Target);
-                    
                 return new TickResult
                 {
                     loop = true,

@@ -141,21 +141,31 @@ namespace Motion
             Quaternion target) => To<Quaternion, QuaternionTween>(getter, setter, target);
 
 
-        public static FloatInertia Inertia(Func<float> getter, Action<float> setter, float initialVelocity) =>
-            Inertia<float, FloatInertia>(getter, setter, initialVelocity);
+        public static FloatInertia Inertia(Func<float> getter, Action<float> setter, float initialVelocity)
+        {
+            var target = FloatInertia.GetTarget(getter(), initialVelocity);
+
+            var animation = To<float, FloatInertia>(getter, setter, target);
+            animation.SetInitialVelocity(initialVelocity);
+            
+            return animation;
+        }
+
+        /*
+        public static Vector2Inertia Inertia(Func<Vector2> getter, Action<Vector2> setter, Vector2 initialVelocity) =>
+            Inertia<Vector2, Vector2Inertia>(getter, setter, initialVelocity);
 
 
         public static A Inertia<T, A>(Func<T> getter, Action<T> setter, T initialVelocity) where T : struct, IEquatable<T> where A : InertiaAnimation<T>, new()
         {
-            InertiaAnimation<T> animation = Instance.GetFromPool<A>();
+            var target = A.GetTarget(getter(), initialVelocity);
+
+            var animation = To<T, A>(getter, setter, target);
             animation.SetInitialVelocity(initialVelocity);
-
-            var target = animation.GetTarget(getter(), initialVelocity);
             
-            Debug.Log(target);
-
-            return To<T, A>(getter, setter, target);
+            return animation;
         }
+        */
 
         public static A To<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : Animation<T>, new()
         {

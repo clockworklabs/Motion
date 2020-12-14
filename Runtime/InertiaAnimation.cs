@@ -3,6 +3,164 @@ using UnityEngine;
 
 namespace Motion
 {
+    public class FloatInertia : Animation<float>
+    {
+        internal static float GetTarget(float origin, float initialVelocity)
+        {
+            var sign = Mathf.Sign(initialVelocity);
+            var power = 0.8f;
+            var diff = Mathf.Pow(Mathf.Abs(initialVelocity), power) * sign;
+
+            return origin + diff;
+        }
+        
+        private Inertia inertia;
+        public Inertia Inertia
+        {
+            get => inertia;
+            private set
+            {
+                if (Started) return;
+
+                inertia = value;
+            }
+        }
+
+        private float initialVelocity;
+        public float InitialVelocity
+        {
+            get => initialVelocity;
+            private set
+            {
+                if (Started) return;
+
+                initialVelocity = value;
+            }
+        }
+
+        private float min;
+        public float Min
+        {
+            get => min;
+            private set
+            {
+                if (Started) return;
+
+                min = value;
+            }
+        }
+
+        private float max;
+        public float Max
+        {
+            get => max;
+            private set
+            {
+                if (Started) return;
+
+                max = value;
+            }
+        }
+        
+        public float Velocity { get; private set; }
+        
+        private bool Spring { get; set; }
+
+        protected override bool Check() => !Mathf.Approximately(Origin, Target) || Origin < Min || Origin > Max;
+        
+        protected override void Setup()
+        {
+            SetInertia(Inertia.Default);
+
+            Spring = false;
+
+            InitialVelocity = 0f;
+            Velocity = 0f;
+            Min = float.MinValue;
+            Max = float.MaxValue;
+        }
+
+        public FloatInertia SetInertia(Inertia inertia)
+        {
+            Inertia = inertia;
+
+            return this;
+        }
+
+        public FloatInertia SetInitialVelocity(float velocity)
+        {
+            InitialVelocity = velocity;
+            Velocity = velocity;
+
+            return this;
+        }
+
+        public FloatInertia SetMinBoundary(float boundary)
+        {
+            Min = boundary;
+
+            return this;
+        }
+
+        public FloatInertia SetMaxBoundary(float boundary)
+        {
+            Max = boundary;
+
+            return this;
+        }
+
+        public FloatInertia SetBoundaries(float min, float max)
+        {
+            SetMinBoundary(min);
+            SetMaxBoundary(max);
+
+            return this;
+        }
+
+        protected override bool Tick(float deltaTime, ref float value) {
+            Spring |= value < Min || value > Max;
+            
+            float target;
+            if (Spring)
+            {
+                target = value < Min ? Min : Max;
+            }
+            else
+            {
+                target = Target;
+            }
+            
+            var delta = value - target;
+            if (Mathf.Abs(Velocity) < Inertia.restSpeed && Mathf.Abs(delta) < Inertia.restDelta)
+            {
+                value = target;
+                return true;
+            }
+
+            if (Spring)
+            {
+                var k = -Inertia.bounceStiffness;
+                // Damping constant, in kg / s
+                var d = -Inertia.bounceDamping;
+        
+                var fSpring = delta * k;
+                var fDamping = Velocity * d;
+                var a = (fSpring + fDamping) * Inertia.bounceInverseMass;
+                Velocity += a * deltaTime;
+            }
+            else
+            {
+                var t = Mathf.InverseLerp(target, Origin, value);
+                
+                Velocity = InitialVelocity * Mathf.Pow(t, Inertia.power);
+            }
+            
+            value += Velocity * deltaTime;
+            
+            return false;
+        }
+    }
+    
     public abstract class InertiaAnimation<T> : Animation<T> where T : struct, IEquatable<T>
     {
         protected abstract int Dimensions { get; }
@@ -87,7 +245,6 @@ namespace Motion
                 var target = Get(Target, i);
                 var min = Get(Min, i);
                 var max = Get(Max, i);
-                Debug.Log($"{origin} - {target} - {min} - {max}");
                 if (!Mathf.Approximately(origin, target) || origin < min || origin > max)
                 {
                     return true;

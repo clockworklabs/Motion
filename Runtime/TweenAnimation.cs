@@ -62,6 +62,7 @@ namespace Motion
             
             if (Time >= 1)
             {
+                value = Target;
                 return true;
             }
 
@@ -265,6 +266,7 @@ namespace Motion
                     break;
                 }
                 default:
+                    value = Target;
                     return true;
             }
 

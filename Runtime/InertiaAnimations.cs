@@ -2,6 +2,7 @@
 
 namespace Motion
 {
+    /*
     public class FloatInertia : InertiaAnimation<float>
     {
         protected override int Dimensions => 1;
@@ -16,6 +17,7 @@ namespace Motion
             value = component;
         }
     }
+    */
     
     public class Vector2Inertia : InertiaAnimation<Vector2>
     {
