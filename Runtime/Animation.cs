@@ -186,56 +186,7 @@ namespace Motion
             }
         }
 
-        private int loopsCount;
-        public int LoopsCount
-        {
-            get => loopsCount;
-            protected set
-            {
-                if (Started) return;
-
-                loopsCount = value;
-            }
-        }
-
-        private LoopType loopType;
-        public LoopType LoopType
-        {
-            get => loopType;
-            protected set
-            {
-                if (Started) return;
-                
-                loopType = value;
-            }
-        }
-
-        private int interval;
-        public int Interval
-        {
-            get => interval;
-            protected set
-            {
-                if (Started) return;
-
-                interval = value;
-            }
-        }
-
-        private float intervalDelay;
-        public float IntervalDelay
-        {
-            get => intervalDelay;
-            protected set
-            {
-                if (Started) return;
-                
-                intervalDelay = value;
-            }
-        }
-
         private float Time { get; set; }
-        protected int Loop { get; set; }
 
         protected Animation()
         {
@@ -312,22 +263,6 @@ namespace Motion
             return this;
         }
 
-        public virtual Animation SetLoops(int loops, LoopType loopType = LoopType.Restart)
-        {
-            LoopsCount = loops;
-            LoopType = loopType;
-
-            return this;
-        }
-
-        public virtual Animation SetInterval(int interval, float delay = 0)
-        {
-            Interval = interval;
-            IntervalDelay = delay;
-
-            return this;
-        }
-
         internal virtual void Reset()
         {
             OnStartCallback = null;
@@ -349,13 +284,8 @@ namespace Motion
             Owner = null;
             
             Delay = 0;
-            LoopsCount = 1;
-            LoopType = LoopType.Restart;
-            Interval = 0;
-            IntervalDelay = 0;
             
             Time = 0;
-            Loop = 0;
         }
 
         public virtual void Play()
@@ -427,9 +357,74 @@ namespace Motion
         
         protected T Origin { get; private set; }
         protected T Target { get; private set; }
+
+        private int loopsCount;
+        public int LoopsCount
+        {
+            get => loopsCount;
+            protected set
+            {
+                if (Started) return;
+
+                loopsCount = value;
+            }
+        }
+
+        private LoopType loopType;
+        public LoopType LoopType
+        {
+            get => loopType;
+            protected set
+            {
+                if (Started) return;
+                
+                loopType = value;
+            }
+        }
+
+        private int interval;
+        public int Interval
+        {
+            get => interval;
+            protected set
+            {
+                if (Started) return;
+
+                interval = value;
+            }
+        }
+
+        private float intervalDelay;
+        public float IntervalDelay
+        {
+            get => intervalDelay;
+            protected set
+            {
+                if (Started) return;
+                
+                intervalDelay = value;
+            }
+        }
         
+        private int Loop { get; set; }
         private bool IsInterval { get; set; }
         private float Accum { get; set; }
+
+        public virtual Animation<T> SetLoops(int loops, LoopType loopType = LoopType.Restart)
+        {
+            LoopsCount = loops;
+            LoopType = loopType;
+
+            return this;
+        }
+
+        public virtual Animation<T> SetInterval(int interval, float delay = 0)
+        {
+            Interval = interval;
+            IntervalDelay = delay;
+
+            return this;
+        }
         
         internal override void Reset()
         {
@@ -440,6 +435,13 @@ namespace Motion
             Target = default;
             IsInterval = false;
             Accum = 0;
+            
+            LoopsCount = 1;
+            LoopType = LoopType.Restart;
+            Interval = 0;
+            IntervalDelay = 0;
+            
+            Loop = 0;
         }
         
         internal void Setup(Func<T> getter, Action<T> setter, T target)
