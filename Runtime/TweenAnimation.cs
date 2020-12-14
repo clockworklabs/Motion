@@ -39,14 +39,21 @@ namespace Motion
         }
 
         private float Time { get; set; }
-        
-        protected override bool Check() => !Origin.Equals(Target);
-        
-        protected override void Setup()
-        {
-            SetTween(Tween.Default);
 
+        internal override void Reset()
+        {
+            base.Reset();
+            
+            SetTween(Tween.Default);
             Time = 0;
+        }
+
+        internal void Setup(Func<T> getter, Action<T> setter, T target)
+        {
+            var origin = getter();
+            if (origin.Equals(target)) return;
+
+            Setup(getter, setter, origin, target);
         }
 
         public TweenAnimation<T> SetTween(Tween tween)

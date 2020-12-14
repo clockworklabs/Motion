@@ -17,14 +17,21 @@ namespace Motion
         }
         
         public T Velocity { get; private set; }
-        
-        protected override bool Check() => !Origin.Equals(Target);
 
-        protected override void Setup()
+        internal override void Reset()
         {
+            base.Reset();
+            
             SetSpring(Spring.Default);
-
             Velocity = default;
+        }
+
+        internal void Setup(Func<T> getter, Action<T> setter, T target)
+        {
+            var origin = getter();
+            if (origin.Equals(target)) return;
+
+            Setup(getter, setter, origin, target);
         }
 
         public SpringAnimation<T> SetSpring(Spring spring)

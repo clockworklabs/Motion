@@ -69,11 +69,10 @@ namespace Motion
             }
         }
 
+        public bool Valid { get; protected set; }
         public bool Active => Valid && !Completed && !Stopped;
         public bool Paused => Active && Started && !Playing;
         
-        public bool Valid { get; protected set; }
-
         private bool autoPlay;
         public bool AutoPlay
         {
@@ -272,12 +271,12 @@ namespace Motion
             OnIntervalCallback = null;
             OnStopCallback = null;
             OnCompleteCallback = null;
-            
+
             Started = false;
             Playing = false;
             Stopped = false;
             Completed = false;
-            Valid = true;
+            Valid = false;
 
             AutoPlay = true;
             
@@ -444,26 +443,15 @@ namespace Motion
             Loop = 0;
         }
         
-        internal void Setup(Func<T> getter, Action<T> setter, T target)
+        protected void Setup(Func<T> getter, Action<T> setter, T origin, T target)
         {
-            Origin = getter();
-            Target = target;
-
-            if (!Check())
-            {
-                Valid = false;
-                return;
-            }
+            Valid = true;
             
+            Origin = origin;
+            Target = target;
             Getter = getter;
             Setter = setter;
-
-            Setup();
         }
-
-        protected abstract bool Check();
-
-        protected abstract void Setup();
 
         private void SwapOriginAndTarget()
         {
