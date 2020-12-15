@@ -85,17 +85,19 @@ namespace Motion
 
         public override void Play()
         {
+            var origin = Getter();
+            
             var sign = Mathf.Sign(InitialVelocity);
             var diff = Mathf.Pow(Mathf.Abs(InitialVelocity), Inertia.power) * sign;
 
-            var target = Origin + diff;
-            if (Mathf.Approximately(Origin, target) && Origin > Min && Origin < Max)
+            var target = origin + diff;
+            if (Mathf.Approximately(origin, target) && origin > Min && origin < Max)
             {
                 Valid = false;
                 return;
             }
 
-            Setup(Getter, Setter, Origin, target);
+            Setup(Getter, Setter, origin, target);
             
             base.Play();
         }
