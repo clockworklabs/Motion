@@ -67,4 +67,31 @@ namespace Motion
 
         protected override float SqrMagnitude(Quaternion a) => Quaternion.Dot(a, a);
     }
+    
+    public class MatrixSpring : SpringAnimation<Matrix4x4>
+    {
+        protected override Matrix4x4 Add(Matrix4x4 a, Matrix4x4 b) => new Matrix4x4(
+            new Vector4(a.m00 + b.m00, a.m10 + b.m10, a.m20 + b.m20, a.m30 + b.m30),  
+            new Vector4(a.m01 + b.m01, a.m11 + b.m11, a.m21 + b.m21, a.m31 + b.m31), 
+            new Vector4(a.m02 + b.m02, a.m12 + b.m12, a.m22 + b.m22, a.m32 + b.m32), 
+            new Vector4(a.m03 + b.m03, a.m13 + b.m13, a.m23 + b.m23, a.m33 + b.m33));
+
+        protected override Matrix4x4 Subtract(Matrix4x4 a, Matrix4x4 b) => new Matrix4x4(
+            new Vector4(a.m00 - b.m00, a.m10 - b.m10, a.m20 - b.m20, a.m30 - b.m30),  
+            new Vector4(a.m01 - b.m01, a.m11 - b.m11, a.m21 - b.m21, a.m31 - b.m31), 
+            new Vector4(a.m02 - b.m02, a.m12 - b.m12, a.m22 - b.m22, a.m32 - b.m32), 
+            new Vector4(a.m03 - b.m03, a.m13 - b.m13, a.m23 - b.m23, a.m33 - b.m33));
+
+        protected override Matrix4x4 Multiply(Matrix4x4 a, float b) => new Matrix4x4(
+            new Vector4(a.m00 * b, a.m10 * b, a.m20 * b, a.m30 * b),  
+            new Vector4(a.m01 * b, a.m11 * b, a.m21 * b, a.m31 * b), 
+            new Vector4(a.m02 * b, a.m12 * b, a.m22 * b, a.m32 * b), 
+            new Vector4(a.m03 * b, a.m13 * b, a.m23 * b, a.m33 * b));
+
+        protected override float SqrMagnitude(Matrix4x4 a) =>
+            a.m00 * a.m00 + a.m01 * a.m01 + a.m02 * a.m02 + a.m03 * a.m03 +
+            a.m10 * a.m10 + a.m11 * a.m11 + a.m12 * a.m12 + a.m13 * a.m13 +
+            a.m20 * a.m20 + a.m21 * a.m21 + a.m22 * a.m22 + a.m23 * a.m23 +
+            a.m30 * a.m30 + a.m31 * a.m31 + a.m32 * a.m32 + a.m33 * a.m33;
+    }
 }

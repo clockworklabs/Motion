@@ -180,6 +180,9 @@ namespace Motion
 
         public static QuaternionSpring Spring(Func<Quaternion> getter, Action<Quaternion> setter,
             Quaternion target) => Spring<Quaternion, QuaternionSpring>(getter, setter, target);
+
+        public static MatrixSpring Spring(Func<Matrix4x4> getter, Action<Matrix4x4> setter,
+            Matrix4x4 target) => Spring<Matrix4x4, MatrixSpring>(getter, setter, target);
         
         public static IntTween Tween(Func<int> getter, Action<int> setter,
             int target) => Tween<int, IntTween>(getter, setter, target);
@@ -201,5 +204,8 @@ namespace Motion
 
         public static QuaternionTween Tween(Func<Quaternion> getter, Action<Quaternion> setter,
             Quaternion target) => Tween<Quaternion, QuaternionTween>(getter, setter, target);
+
+        public static MatrixTween Tween(Func<Matrix4x4> getter, Action<Matrix4x4> setter,
+            Matrix4x4 target) => Tween<Matrix4x4, MatrixTween>(getter, setter, target);
     }
 }
