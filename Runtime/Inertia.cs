@@ -14,6 +14,16 @@ namespace Motion
         public float restSpeed;
         public float restDelta;
 
+        public Inertia(Inertia other)
+        {
+            power = other.power;
+            bounceStiffness = other.bounceStiffness;
+            bounceInverseMass = other.bounceInverseMass;
+            bounceDamping = other.bounceDamping;
+            restSpeed = other.restSpeed;
+            restDelta = other.restDelta;
+        }
+
         public static Inertia Default = new Inertia
         {
             power = 0.8f,

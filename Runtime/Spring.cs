@@ -14,6 +14,15 @@ namespace Motion
 
         public static Spring Default => Soft;
 
+        public Spring(Spring other)
+        {
+            stiffness = other.stiffness;
+            inverseMass = other.inverseMass;
+            damping = other.damping;
+            sqrRestSpeed = other.sqrRestSpeed;
+            sqrRestDelta = other.sqrRestDelta;
+        }
+
         public static Spring Soft = new Spring
         {
             stiffness = 170,
