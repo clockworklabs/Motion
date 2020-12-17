@@ -130,27 +130,6 @@ namespace Motion
                 onPauseCallback = value;
             }
         }
-        private Action onLoopCallback;
-        public Action OnLoopCallback
-        {
-            get => onLoopCallback;
-            protected set
-            {
-                if (Started) return;
-                
-                onLoopCallback = value;
-            }
-        }
-        private Action onIntervalCallback;
-        public Action OnIntervalCallback {
-            get => onIntervalCallback;
-            protected set
-            {
-                if (Started) return;
-                
-                onIntervalCallback = value;
-            }
-        }
         private Action onStopCallback;
         public Action OnStopCallback
         {
@@ -227,20 +206,6 @@ namespace Motion
             return this;
         }
 
-        public virtual Animation OnLoop(Action callback)
-        {
-            OnLoopCallback = callback;
-
-            return this;
-        }
-
-        public virtual Animation OnInterval(Action callback)
-        {
-            OnIntervalCallback = callback;
-
-            return this;
-        }
-
         public virtual Animation OnStop(Action callback)
         {
             OnStopCallback = callback;
@@ -267,8 +232,6 @@ namespace Motion
             OnStartCallback = null;
             OnPlayCallback = null;
             OnPauseCallback = null;
-            OnLoopCallback = null;
-            OnIntervalCallback = null;
             OnStopCallback = null;
             OnCompleteCallback = null;
 
@@ -331,22 +294,14 @@ namespace Motion
             }
 
             var result = Tick(deltaTime);
-
-            if (result.loop)
-            {
-                OnLoopCallback?.Invoke();
-            }
-            if (result.interval)
-            {
-                OnIntervalCallback?.Invoke();
-            }
-            if (result.complete)
+            
+            if (result)
             {
                 Completed = true;
             }
         }
 
-        protected abstract TickResult Tick(float deltaTime);
+        protected abstract bool Tick(float deltaTime);
     }
     
     public abstract class Animation<T> : Animation where T : struct, IEquatable<T>
@@ -356,6 +311,28 @@ namespace Motion
         
         protected T Origin { get; private set; }
         protected T Target { get; private set; }
+        
+        private Action onLoopCallback;
+        public Action OnLoopCallback
+        {
+            get => onLoopCallback;
+            protected set
+            {
+                if (Started) return;
+                
+                onLoopCallback = value;
+            }
+        }
+        private Action onIntervalCallback;
+        public Action OnIntervalCallback {
+            get => onIntervalCallback;
+            protected set
+            {
+                if (Started) return;
+                
+                onIntervalCallback = value;
+            }
+        }
 
         private int loopsCount;
         public int LoopsCount
@@ -409,6 +386,20 @@ namespace Motion
         private bool IsInterval { get; set; }
         private float Accum { get; set; }
 
+        public virtual Animation OnLoop(Action callback)
+        {
+            OnLoopCallback = callback;
+
+            return this;
+        }
+
+        public virtual Animation OnInterval(Action callback)
+        {
+            OnIntervalCallback = callback;
+
+            return this;
+        }
+
         public virtual Animation<T> SetLoops(int loops, LoopType loopType = LoopType.Restart)
         {
             LoopsCount = loops;
@@ -432,6 +423,8 @@ namespace Motion
             Setter = null;
             Origin = default;
             Target = default;
+            OnLoopCallback = null;
+            OnIntervalCallback = null;
             IsInterval = false;
             Accum = 0;
             
@@ -467,14 +460,11 @@ namespace Motion
             Setter(Target);
         }
 
-        protected override TickResult Tick(float deltaTime)
+        protected override bool Tick(float deltaTime)
         {            
             if (LoopsCount == 0)
             {
-                return new TickResult
-                {
-                    complete = true
-                };
+                return true;
             }
 
             if (IsInterval)
@@ -482,7 +472,7 @@ namespace Motion
                 if (Accum < IntervalDelay)
                 {
                     Accum += deltaTime;
-                    return new TickResult();
+                    return false;
                 }
 
                 IsInterval = false;
@@ -496,7 +486,7 @@ namespace Motion
             
             if (!done)
             {
-                return new TickResult();
+                return false;
             }
             
             Loop++;
@@ -504,12 +494,13 @@ namespace Motion
 
             if (LoopsCount > 0 && Loop >= LoopsCount)
             {
-                return new TickResult
+                OnLoopCallback?.Invoke();
+                if (IsInterval)
                 {
-                    loop = true,
-                    interval = IsInterval,
-                    complete = true
-                };
+                    OnIntervalCallback?.Invoke();
+                }
+
+                return true;
             }
                 
             if (LoopType == LoopType.PingPong)
@@ -518,12 +509,14 @@ namespace Motion
             }
                 
             Setter(Origin);
-
-            return new TickResult
+            
+            OnLoopCallback?.Invoke();
+            if (IsInterval)
             {
-                loop = true,
-                interval = IsInterval
-            };
+                OnIntervalCallback?.Invoke();
+            }
+            
+            return false;
         }
 
         protected abstract bool Tick(float deltaTime, ref T value);
