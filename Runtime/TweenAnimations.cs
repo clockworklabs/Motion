@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Motion.Utils;
+using UnityEngine;
 
 namespace Motion
 {
@@ -66,10 +67,7 @@ namespace Motion
     
     public class MatrixTween : TweenAnimation<Matrix4x4>
     {
-        protected override Matrix4x4 LinearInterpolation(Matrix4x4 a, Matrix4x4 b, float t) => new Matrix4x4(
-            new Vector4(Mathf.LerpUnclamped(a.m00, b.m00, t), Mathf.LerpUnclamped(a.m10, b.m10, t), Mathf.LerpUnclamped(a.m20, b.m20, t), Mathf.LerpUnclamped(a.m30, b.m30, t)),  
-            new Vector4(Mathf.LerpUnclamped(a.m01, b.m01, t), Mathf.LerpUnclamped(a.m11, b.m11, t), Mathf.LerpUnclamped(a.m21, b.m21, t), Mathf.LerpUnclamped(a.m31, b.m31, t)), 
-            new Vector4(Mathf.LerpUnclamped(a.m02, b.m02, t), Mathf.LerpUnclamped(a.m12, b.m12, t), Mathf.LerpUnclamped(a.m22, b.m22, t), Mathf.LerpUnclamped(a.m32, b.m32, t)), 
-            new Vector4(Mathf.LerpUnclamped(a.m03, b.m03, t), Mathf.LerpUnclamped(a.m13, b.m13, t), Mathf.LerpUnclamped(a.m23, b.m23, t), Mathf.LerpUnclamped(a.m33, b.m33, t)));
+        protected override Matrix4x4 LinearInterpolation(Matrix4x4 a, Matrix4x4 b, float t) =>
+            MatrixUtils.Lerp(a, b, t);
     }
 }
