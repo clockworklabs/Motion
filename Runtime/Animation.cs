@@ -185,35 +185,35 @@ namespace Motion
             return this;
         }
 
-        public virtual Animation OnStart(Action callback)
+        public Animation OnStart(Action callback)
         {
             OnStartCallback = callback;
 
             return this;
         }
 
-        public virtual Animation OnPlay(Action callback)
+        public Animation OnPlay(Action callback)
         {
             OnPlayCallback = callback;
 
             return this;
         }
 
-        public virtual Animation OnPause(Action callback)
+        public Animation OnPause(Action callback)
         {
             OnPauseCallback = callback;
 
             return this;
         }
 
-        public virtual Animation OnStop(Action callback)
+        public Animation OnStop(Action callback)
         {
             OnStopCallback = callback;
 
             return this;
         }
 
-        public virtual Animation OnComplete(Action callback)
+        public Animation OnComplete(Action callback)
         {
             OnCompleteCallback = callback;
 
@@ -263,7 +263,7 @@ namespace Motion
 
         public void Stop(bool complete) => Stop(complete, null);
         public void Stop(object owner) => Stop(false, owner);
-        public virtual void Stop(bool complete = false, object owner = null)
+        public void Stop(bool complete = false, object owner = null)
         {
             if (!Active) return;
             if (Owner != null && Owner != owner) return;
@@ -312,6 +312,16 @@ namespace Motion
         protected T Origin { get; private set; }
         protected T Target { get; private set; }
         
+        private Action onStepCallback;
+        public Action OnStepCallback {
+            get => onStepCallback;
+            protected set
+            {
+                if (Started) return;
+                
+                onStepCallback = value;
+            }
+        }
         private Action onLoopCallback;
         public Action OnLoopCallback
         {
@@ -385,22 +395,28 @@ namespace Motion
         private int Loop { get; set; }
         private bool IsInterval { get; set; }
         private float Accum { get; set; }
+        
+        public Animation<T> OnStep(Action callback)
+        {
+            OnStepCallback = callback;
 
-        public virtual Animation OnLoop(Action callback)
+            return this;
+        }
+        public Animation<T> OnLoop(Action callback)
         {
             OnLoopCallback = callback;
 
             return this;
         }
 
-        public virtual Animation OnInterval(Action callback)
+        public Animation<T> OnInterval(Action callback)
         {
             OnIntervalCallback = callback;
 
             return this;
         }
 
-        public virtual Animation<T> SetLoops(int loops, LoopType loopType = LoopType.Restart)
+        public Animation<T> SetLoops(int loops, LoopType loopType = LoopType.Restart)
         {
             LoopsCount = loops;
             LoopType = loopType;
@@ -408,7 +424,7 @@ namespace Motion
             return this;
         }
 
-        public virtual Animation<T> SetInterval(int interval, float delay = 0)
+        public Animation<T> SetInterval(int interval, float delay = 0)
         {
             Interval = interval;
             IntervalDelay = delay;
@@ -423,6 +439,7 @@ namespace Motion
             Setter = null;
             Origin = default;
             Target = default;
+            OnStepCallback = null;
             OnLoopCallback = null;
             OnIntervalCallback = null;
             IsInterval = false;
@@ -481,6 +498,8 @@ namespace Motion
 
             var value = Getter();
             var done = Tick(deltaTime, ref value);
+            
+            OnStepCallback?.Invoke();
             
             Setter(value);
             
