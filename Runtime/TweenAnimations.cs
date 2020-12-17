@@ -34,6 +34,33 @@ namespace Motion
     
     public class QuaternionTween : TweenAnimation<Quaternion>
     {
+
+        private bool slerp;
+        public bool Slerp
+        {
+            get => slerp;
+            private set
+            {
+                if (Started) return;
+                
+                slerp = value;
+            }
+        }
+
+        public QuaternionTween SetSlerp(bool slerp)
+        {
+            Slerp = slerp;
+            
+            return this;
+        }
+
+        internal override void Reset()
+        {
+            base.Reset();
+            
+            SetSlerp(true);
+        }
+        
         protected override Quaternion LinearInterpolation(Quaternion a, Quaternion b, float t) => Quaternion.SlerpUnclamped(a, b, t);
     }
     
