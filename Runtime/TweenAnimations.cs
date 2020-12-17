@@ -34,7 +34,7 @@ namespace Motion
     
     public class QuaternionTween : TweenAnimation<Quaternion>
     {
-        protected override Quaternion LinearInterpolation(Quaternion a, Quaternion b, float t) => Quaternion.LerpUnclamped(a, b, t);
+        protected override Quaternion LinearInterpolation(Quaternion a, Quaternion b, float t) => Quaternion.SlerpUnclamped(a, b, t);
     }
     
     public class MatrixTween : TweenAnimation<Matrix4x4>
