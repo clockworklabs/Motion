@@ -178,6 +178,11 @@ namespace Motion
             }
             
             value += Velocity * deltaTime;
+            if ((value < Min || value > Max) && Inertia.bounceInverseMass <= 0)
+            {
+                value = value < Min ? Min : Max;
+                return true;
+            }
             
             return false;
         }
