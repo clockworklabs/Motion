@@ -2,6 +2,8 @@
 
 namespace Motion
 {
+    public delegate void RefAction<T>(ref T value) where T : struct;
+    
     public abstract class Animation
     {
         private static uint nextId;
@@ -430,6 +432,20 @@ namespace Motion
             IntervalDelay = delay;
 
             return this;
+        }
+
+        public T UpdateTarget(RefAction<T> update)
+        {
+            if (!Active)
+            {
+                return Target;
+            }
+            
+            var target = Target;
+            update?.Invoke(ref target);
+            Target = target;
+
+            return Target;
         }
         
         internal override void Reset()

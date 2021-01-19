@@ -1,9 +1,10 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
     [Serializable]
-    public struct Inertia
+    public struct Inertia : IEquatable<Inertia>
     {
         public float power;
 
@@ -33,5 +34,35 @@ namespace Motion
             restSpeed = 0.01f,
             restDelta = 0.01f
         };
+
+        public bool Equals(Inertia other)
+        {
+            if (!Mathf.Approximately(power, other.power))
+            {
+                return false;
+            }
+            if (!Mathf.Approximately(bounceStiffness, other.bounceStiffness))
+            {
+                return false;
+            }
+            if (!Mathf.Approximately(bounceInverseMass, other.bounceInverseMass))
+            {
+                return false;
+            }
+            if (!Mathf.Approximately(bounceDamping, other.bounceDamping))
+            {
+                return false;
+            }
+            if (!Mathf.Approximately(restSpeed, other.restSpeed))
+            {
+                return false;
+            }
+            if (!Mathf.Approximately(restDelta, other.restDelta))
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

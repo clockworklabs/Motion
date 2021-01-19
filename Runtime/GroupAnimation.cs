@@ -62,7 +62,7 @@ namespace Motion
             for (var i = animations.Length - 1; i >= 0; i--)
             {
                 var animation = animations[i];
-                if(!animation.Active || animation.Started) continue;
+                if(animation == null || !animation.Active || animation.Started) continue;
                 
                 animation.SetAutoPlay(false);
                 animation.SetOwner(null);
