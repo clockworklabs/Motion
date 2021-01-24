@@ -34,6 +34,7 @@ namespace Motion
 
             SetSpring(Spring.Default);
             Velocity = default;
+            V0 = default;
         }
 
         internal void Setup(Func<T> getter, Action<T> setter, T target)
