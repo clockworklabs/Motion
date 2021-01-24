@@ -127,8 +127,7 @@ namespace Motion
         protected override bool Tick(float deltaTime, ref T value)
         {
             var delta = Subtract(value, Target);
-            var deltaSqrMagnitude = SqrMagnitude(delta);
-            if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && deltaSqrMagnitude < Spring.sqrRestDelta)
+            if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && SqrMagnitude(delta) < Spring.sqrRestDelta)
             {
                 value = Target;
                 return true;
