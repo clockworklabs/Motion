@@ -17,7 +17,6 @@ namespace Motion
             }
         }
 
-        // parameters for closed form solution
         private float Omega { get; set; }
         private float Zeta { get; set; }
         private float OmegaZeta { get; set; }
@@ -55,7 +54,7 @@ namespace Motion
             Zeta = Spring.damping / (2 * Mathf.Sqrt(Spring.stiffness / Spring.inverseMass));
             Omega = Mathf.Sqrt(Spring.stiffness * Spring.inverseMass);
             OmegaZeta = Omega * Zeta;
-            DampingProfile = DampingProfile.UnderDamped;
+            
             if (Mathf.Abs(1 - Zeta) < 0.01f)
             {
                 DampingProfile = DampingProfile.CriticallyDamped;
@@ -63,6 +62,10 @@ namespace Motion
             else if (Zeta > 1)
             {
                 DampingProfile = DampingProfile.OverDamped;
+            }
+            else
+            {
+                DampingProfile = DampingProfile.UnderDamped;
             }
 
             return this;
@@ -156,7 +159,7 @@ namespace Motion
         protected abstract float SqrMagnitude(T a);
     }
 
-    enum DampingProfile
+    internal enum DampingProfile
     {
         UnderDamped,
         OverDamped,
