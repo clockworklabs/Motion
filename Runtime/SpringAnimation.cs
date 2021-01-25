@@ -5,15 +5,15 @@ namespace Motion
 {
     public abstract class SpringAnimation<T> : Animation<T> where T : struct, IEquatable<T>
     {
-        private Spring spring;
+        private Spring _spring;
         public Spring Spring
         {
-            get => spring;
+            get => _spring;
             private set
             {
                 if (Started) return;
 
-                spring = value;
+                _spring = value;
             }
         }
 
@@ -24,7 +24,7 @@ namespace Motion
         private T X0 { get; set; }
         private T V0 { get; set; }
         private float ElapsedTime { get; set; } = 0;
-        private DampingProfile dampingProfile { get; set; }
+        private DampingProfile DampingProfile { get; set; }
 
         public T Velocity { get; private set; }
 
@@ -43,7 +43,6 @@ namespace Motion
             var origin = getter();
             if (origin.Equals(target)) return;
 
-            // Setting parameters
             X0 = Subtract(target, origin);
 
             Setup(getter, setter, origin, target);
@@ -53,18 +52,17 @@ namespace Motion
         {
             Spring = spring;
 
-            // Setting parameters
             Zeta = Spring.damping / (2 * Mathf.Sqrt(Spring.stiffness / Spring.inverseMass));
             Omega = Mathf.Sqrt(Spring.stiffness * Spring.inverseMass);
             OmegaZeta = Omega * Zeta;
-            dampingProfile = DampingProfile.Underdamped;
+            DampingProfile = DampingProfile.UnderDamped;
             if (Mathf.Abs(1 - Zeta) < 0.01f)
             {
-                dampingProfile = DampingProfile.CriticallyDamped;
+                DampingProfile = DampingProfile.CriticallyDamped;
             }
             else if (Zeta > 1)
             {
-                dampingProfile = DampingProfile.Overdamped;
+                DampingProfile = DampingProfile.OverDamped;
             }
 
             return this;
@@ -76,13 +74,40 @@ namespace Motion
 
             Velocity = velocity;
 
-            // Setting parameters
             V0 = Multiply(Velocity, -1);
 
             return this;
         }
 
-        protected T TickOverDamped(float t)
+        protected override bool Tick(float deltaTime, ref T value)
+        {
+            var delta = Subtract(value, Target);
+            if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && SqrMagnitude(delta) < Spring.sqrRestDelta)
+            {
+                value = Target;
+                return true;
+            }
+
+            ElapsedTime += deltaTime;
+            switch(DampingProfile)
+            {
+                case DampingProfile.OverDamped:
+                    value = TickOverDamped(ElapsedTime);
+                    break;
+                case DampingProfile.UnderDamped:
+                    value = TickUnderDamped(ElapsedTime);
+                    break;
+                case DampingProfile.CriticallyDamped:
+                    value = TickCriticallyDamped(ElapsedTime);
+                    break;
+                default:
+                    throw new UnityException("Damping profile not supported");
+            }
+
+            return false;
+        }
+
+        private T TickOverDamped(float t)
         {
             var omega2 = Omega * Mathf.Sqrt(Zeta * Zeta - 1.0f);
             var z1 = -OmegaZeta - omega2;
@@ -98,7 +123,7 @@ namespace Motion
             return Subtract(Target, x);
         }
 
-        protected T TickUnderDamped(float t)
+        private T TickUnderDamped(float t)
         {
             var omega1 = Omega * Mathf.Sqrt(1.0f - Zeta * Zeta);
             var e = Mathf.Exp(-OmegaZeta * t);
@@ -115,7 +140,7 @@ namespace Motion
             return Subtract(Target, x);
         }
 
-        protected T TickCriticallyDamped(float t)
+        private T TickCriticallyDamped(float t)
         {
             var e = Mathf.Exp(-Omega * t);
 
@@ -123,32 +148,6 @@ namespace Motion
             Velocity = Multiply(Add(Multiply(V0, (1 - t * Omega)), Multiply(X0, t * Omega * Omega)), e);
 
             return Subtract(Target, x);
-        }
-
-        protected override bool Tick(float deltaTime, ref T value)
-        {
-            var delta = Subtract(value, Target);
-            if (SqrMagnitude(Velocity) < Spring.sqrRestSpeed && SqrMagnitude(delta) < Spring.sqrRestDelta)
-            {
-                value = Target;
-                return true;
-            }
-
-            ElapsedTime += deltaTime;
-            switch(dampingProfile)
-            {
-                case DampingProfile.Overdamped:
-                    value = TickOverDamped(ElapsedTime);
-                    break;
-                case DampingProfile.Underdamped:
-                    value = TickUnderDamped(ElapsedTime);
-                    break;
-                default:
-                    value = TickCriticallyDamped(ElapsedTime);
-                    break;
-            }
-
-            return false;
         }
 
         protected abstract T Add(T a, T b);
@@ -159,8 +158,8 @@ namespace Motion
 
     enum DampingProfile
     {
-        Underdamped,
-        Overdamped,
+        UnderDamped,
+        OverDamped,
         CriticallyDamped
     }
 
