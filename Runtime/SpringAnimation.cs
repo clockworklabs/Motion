@@ -35,6 +35,7 @@ namespace Motion
             SetSpring(Spring.Default);
             Velocity = default;
             V0 = default;
+            ElapsedTime = 0;
         }
 
         internal void Setup(Func<T> getter, Action<T> setter, T target)
@@ -44,7 +45,6 @@ namespace Motion
 
             // Setting parameters
             X0 = Subtract(target, origin);
-            ElapsedTime = 0;
 
             Setup(getter, setter, origin, target);
         }
