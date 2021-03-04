@@ -49,6 +49,7 @@ namespace Motion
 
         protected override void PrepareForLoop()
         {
+            X0 = Subtract(Target, Origin);
             ElapsedTime = 0;
         }
 
