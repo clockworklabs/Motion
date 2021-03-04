@@ -102,6 +102,11 @@ namespace Motion
             base.Play();
         }
 
+        protected override void PrepareForLoop()
+        {
+            throw new UnityException("InertiaAnimations don't support looping");
+        }
+
         public FloatInertia SetInertia(Inertia inertia)
         {
             Inertia = inertia;

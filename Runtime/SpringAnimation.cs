@@ -47,6 +47,11 @@ namespace Motion
             Setup(getter, setter, origin, target);
         }
 
+        protected override void PrepareForLoop()
+        {
+            ElapsedTime = 0;
+        }
+
         public SpringAnimation<T> SetSpring(Spring spring)
         {
             Spring = spring;

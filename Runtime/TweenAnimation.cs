@@ -56,6 +56,11 @@ namespace Motion
             Setup(getter, setter, origin, target);
         }
 
+        protected override void PrepareForLoop()
+        {
+            Time = 0;
+        }
+
         public TweenAnimation<T> SetTween(Tween tween)
         {
             Ease = tween.ease;

@@ -486,6 +486,8 @@ namespace Motion
             Target = temp;
         }
 
+        protected abstract void PrepareForLoop();
+
         protected override void OnStop(bool complete)
         {
             if (!complete) return;
@@ -543,6 +545,7 @@ namespace Motion
                 SwapOriginAndTarget();
             }
                 
+            PrepareForLoop();
             Setter(Origin);
             
             OnLoopCallback?.Invoke();
