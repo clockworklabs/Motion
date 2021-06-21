@@ -29,8 +29,8 @@ namespace Motion
             stiffness = 170,
             inverseMass = 1,
             damping = 26,
-            sqrRestSpeed = 0.01f * 0.01f,
-            sqrRestDelta = 0.01f * 0.01f
+            sqrRestSpeed = 0.05f * 0.05f,
+            sqrRestDelta = 0.05f * 0.05f
         };
 
         public static Spring Fast = new Spring
@@ -38,8 +38,8 @@ namespace Motion
             stiffness = 400,
             inverseMass = 2,
             damping = 35,
-            sqrRestSpeed = 0.01f * 0.01f,
-            sqrRestDelta = 0.01f * 0.01f
+            sqrRestSpeed = 0.05f * 0.05f,
+            sqrRestDelta = 0.05f * 0.05f
         };
 
         public static Spring Bouncy = new Spring
@@ -47,8 +47,8 @@ namespace Motion
             stiffness = 100,
             inverseMass = 1,
             damping = 10,
-            sqrRestSpeed = 0.01f * 0.01f,
-            sqrRestDelta = 0.01f * 0.01f
+            sqrRestSpeed = 0.05f * 0.05f,
+            sqrRestDelta = 0.05f * 0.05f
         };
 
         public bool Equals(Spring other)

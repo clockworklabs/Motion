@@ -31,8 +31,8 @@ namespace Motion
             bounceStiffness = 170,
             bounceInverseMass = 1,
             bounceDamping = 26,
-            restSpeed = 0.01f,
-            restDelta = 0.01f
+            restSpeed = 0.05f,
+            restDelta = 0.05f
         };
 
         public bool Equals(Inertia other)
