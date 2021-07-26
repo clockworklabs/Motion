@@ -208,13 +208,17 @@ namespace Motion
         public static MatrixTween Tween(Func<Matrix4x4> getter, Action<Matrix4x4> setter,
             Matrix4x4 target) => Tween<Matrix4x4, MatrixTween>(getter, setter, target);
 
-        public static void Countdown(float time, Action callback)
+        public static Countdown Countdown(float time, Action callback)
         {
-            Tween(() => 0f, _ => { }, 1f).SetTween(new Tween
+            var animation = Instance.GetFromPool<Countdown>();
+            animation.Setup(time);
+            if(!animation.Valid)
             {
-                duration = time,
-                ease = Ease.Linear
-            }).OnComplete(callback);
+                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
+            }
+            animation.OnComplete(callback);
+            
+            return animation;
         }
     }
 }
