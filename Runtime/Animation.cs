@@ -434,32 +434,6 @@ namespace Motion
             return this;
         }
 
-        public Animation<T> UpdateTarget(T target)
-        {
-            if (!Active)
-            {
-                return this;
-            }
-            
-            Target = target;
-
-            return this;
-        }
-
-        public Animation<T> UpdateTarget(RefAction<T> update)
-        {
-            if (!Active)
-            {
-                return this;
-            }
-            
-            var target = Target;
-            update?.Invoke(ref target);
-            Target = target;
-
-            return this;
-        }
-        
         internal override void Reset()
         {
             base.Reset();

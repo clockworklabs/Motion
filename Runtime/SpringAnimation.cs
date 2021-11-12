@@ -27,6 +27,9 @@ namespace Motion
 
         public T Velocity { get; private set; }
 
+        private Func<T> Getter { get; set; }
+        private Action<T> Setter { get; set; }
+
         internal override void Reset()
         {
             base.Reset();
@@ -39,6 +42,9 @@ namespace Motion
 
         internal void Setup(Func<T> getter, Action<T> setter, T target)
         {
+            Getter = getter;
+            Setter = setter;
+            
             var origin = getter();
             if (origin.Equals(target)) return;
 
@@ -51,6 +57,21 @@ namespace Motion
         {
             X0 = Subtract(Target, Origin);
             ElapsedTime = 0;
+        }
+
+        public SpringAnimation<T> UpdateTarget(T target)
+        {
+            var origin = Getter();
+            if (origin.Equals(target))
+            {
+                return this;
+            }
+
+            X0 = Subtract(target, origin);
+
+            Setup(Getter, Setter, origin, target);
+            
+            return this;
         }
 
         public SpringAnimation<T> SetSpring(Spring spring)
