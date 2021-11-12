@@ -68,6 +68,7 @@ namespace Motion
             }
 
             X0 = Subtract(target, origin);
+            ElapsedTime = 0;
 
             Setup(Getter, Setter, origin, target);
             
