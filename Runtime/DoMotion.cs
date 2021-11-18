@@ -34,11 +34,13 @@ namespace Motion
         }
         #endregion
         
-        private HashSet<uint> ActiveIds { get; } = new HashSet<uint>();
         private List<Animation> ActiveAnimations { get; } = new List<Animation>();
+        private Dictionary<uint, Animation> ActiveAnimationsById { get; } = new Dictionary<uint, Animation>();
         private Dictionary<Type, Stack<Animation>> FreeAnimations { get; } = new Dictionary<Type, Stack<Animation>>();
         
-        private void Update()
+        private static uint _nextId;
+        
+        private void LateUpdate()
         {
             for (var i = ActiveAnimations.Count - 1; i >= 0; i--)
             {
@@ -78,9 +80,13 @@ namespace Motion
                 animation = new T();
                 animation.Reset();
             }
+
+            var id = ++_nextId;
+
+            animation.Id = id;
             
-            ActiveIds.Add(animation.ID);
             ActiveAnimations.Add(animation);
+            ActiveAnimationsById.Add(id, animation);
             
             return animation;
         }
@@ -93,132 +99,183 @@ namespace Motion
             
             var type = animation.GetType();
             
-            ActiveIds.Remove(animation.ID);
             ActiveAnimations.RemoveAtSwapBack(index);
+            ActiveAnimationsById.Remove(animation.Id);
             if (FreeAnimations.TryGetValue(type, out var freeStack))
             {
                 freeStack.Push(animation);
             }
         }
         
-        public static A Spring<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : SpringAnimation<T>, new()
+        public static SpringAnimationId<T> Spring<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : SpringAnimation<T>, new() => Spring<T, A>(getter, setter, target, Motion.Spring.Default);
+        public static SpringAnimationId<T> Spring<T, A>(Func<T> getter, Action<T> setter, T target, Spring spring) where T : struct, IEquatable<T> where A : SpringAnimation<T>, new()
         {
             var animation = Instance.GetFromPool<A>();
             animation.Setup(getter, setter, target);
-            if(!animation.Valid)
-            {
-                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
-            }
+            animation.SetSpring(spring);
             
-            return animation;
+            return new SpringAnimationId<T>(animation.Id);
         }
         
-        public static A Tween<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : TweenAnimation<T>, new()
+        public static TweenAnimationId<T> Tween<T, A>(Func<T> getter, Action<T> setter, T target, float duration = 1, Ease ease = Ease.Back) where T : struct, IEquatable<T> where A : TweenAnimation<T>, new() =>
+            Tween<T, A>(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<T> Tween<T, A>(Func<T> getter, Action<T> setter, T target, Tween tween) where T : struct, IEquatable<T> where A : TweenAnimation<T>, new()
         {
             var animation = Instance.GetFromPool<A>();
             animation.Setup(getter, setter, target);
-            if(!animation.Valid)
-            {
-                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
-            }
+            animation.SetTween(tween);
             
-            return animation;
+            return new TweenAnimationId<T>(animation.Id);
         }
-        
-        public static FloatInertia Inertia(Func<float> getter, Action<float> setter, float initialVelocity)
-        {
-            var animation = Instance.GetFromPool<FloatInertia>();
-            animation.Setup(getter, setter, initialVelocity);
-            if(!animation.Valid)
-            {
-                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
-            }
-            
-            return animation;
-        }
-        
-        /*
-        public static A Inertia<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : InertiaAnimation<T>, new()
-        {
-            var animation = Instance.GetFromPool<A>();
-            animation.Setup(getter, setter, target);
-            if(!animation.Valid)
-            {
-                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
-            }
-            
-            return animation;
-        }
-        */
 
-        public static GroupAnimation Group(params Animation[] animations)
+        public static InertiaAnimationId Inertia(Func<float> getter, Action<float> setter, float velocity) =>
+            Inertia(getter, setter, velocity, Motion.Inertia.Default);
+        public static InertiaAnimationId Inertia(Func<float> getter, Action<float> setter, float velocity, float min, float max) =>
+            Inertia(getter, setter, velocity, Motion.Inertia.Default, min, max);
+        public static InertiaAnimationId Inertia(Func<float> getter, Action<float> setter, float velocity, Inertia inertia) =>
+            Inertia(getter, setter, velocity, inertia, float.MinValue, float.MaxValue);
+        public static InertiaAnimationId Inertia(Func<float> getter, Action<float> setter, float velocity, Inertia inertia, float min, float max)
+        {
+            var animation = Instance.GetFromPool<InertiaAnimation>();
+            animation.Setup(getter, setter);
+            animation.SetInertia(inertia);
+            animation.SetInitialVelocity(velocity);
+            animation.SetBoundaries(min, max);
+            
+            return new InertiaAnimationId(animation.Id);
+        }
+        
+        public static GroupAnimationId Group(params AnimationId[] animations)
         {
             var animation = Instance.GetFromPool<GroupAnimation>();
             animation.Setup(animations);
-            if(!animation.Valid)
-            {
-                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
-            }
             
-            return animation;
+            return new GroupAnimationId(animation.Id);
         }
 
-        public static FloatSpring Spring(Func<float> getter, Action<float> setter,
-            float target) => Spring<float, FloatSpring>(getter, setter, target);
+        public static SpringAnimationId<float> Spring(Func<float> getter, Action<float> setter, float target) =>
+            Spring(getter, setter, target, Motion.Spring.Default);
+        public static SpringAnimationId<float> Spring(Func<float> getter, Action<float> setter, float target, Spring spring) =>
+            Spring<float, FloatSpring>(getter, setter, target, spring);
 
-        public static Vector2Spring Spring(Func<Vector2> getter, Action<Vector2> setter,
-            Vector2 target) => Spring<Vector2, Vector2Spring>(getter, setter, target);
+        public static SpringAnimationId<Vector2> Spring(Func<Vector2> getter, Action<Vector2> setter, Vector2 target) =>
+            Spring(getter, setter, target, Motion.Spring.Default);
+        public static SpringAnimationId<Vector2> Spring(Func<Vector2> getter, Action<Vector2> setter, Vector2 target, Spring spring) =>
+            Spring<Vector2, Vector2Spring>(getter, setter, target, spring);
 
-        public static Vector3Spring Spring(Func<Vector3> getter, Action<Vector3> setter,
-            Vector3 target) => Spring<Vector3, Vector3Spring>(getter, setter, target);
+        public static SpringAnimationId<Vector3> Spring(Func<Vector3> getter, Action<Vector3> setter, Vector3 target) =>
+            Spring(getter, setter, target, Motion.Spring.Default);
+        public static SpringAnimationId<Vector3> Spring(Func<Vector3> getter, Action<Vector3> setter, Vector3 target, Spring spring) =>
+            Spring<Vector3, Vector3Spring>(getter, setter, target, spring);
 
-        public static Vector4Spring Spring(Func<Vector4> getter, Action<Vector4> setter,
-            Vector4 target) => Spring<Vector4, Vector4Spring>(getter, setter, target);
+        public static SpringAnimationId<Vector4> Spring(Func<Vector4> getter, Action<Vector4> setter, Vector4 target) =>
+            Spring(getter, setter, target, Motion.Spring.Default);
+        public static SpringAnimationId<Vector4> Spring(Func<Vector4> getter, Action<Vector4> setter, Vector4 target, Spring spring) =>
+            Spring<Vector4, Vector4Spring>(getter, setter, target, spring);
 
-        public static ColorSpring Spring(Func<Color> getter, Action<Color> setter,
-            Color target) => Spring<Color, ColorSpring>(getter, setter, target);
+        public static SpringAnimationId<Color> Spring(Func<Color> getter, Action<Color> setter, Color target) =>
+            Spring(getter, setter, target, Motion.Spring.Default);
+        public static SpringAnimationId<Color> Spring(Func<Color> getter, Action<Color> setter, Color target, Spring spring) =>
+            Spring<Color, ColorSpring>(getter, setter, target, spring);
 
-        public static QuaternionSpring Spring(Func<Quaternion> getter, Action<Quaternion> setter,
-            Quaternion target) => Spring<Quaternion, QuaternionSpring>(getter, setter, target);
+        public static SpringAnimationId<Quaternion> Spring(Func<Quaternion> getter, Action<Quaternion> setter, Quaternion target) =>
+            Spring(getter, setter, target, Motion.Spring.Default);
+        public static SpringAnimationId<Quaternion> Spring(Func<Quaternion> getter, Action<Quaternion> setter, Quaternion target, Spring spring) =>
+            Spring<Quaternion, QuaternionSpring>(getter, setter, target, spring);
 
-        public static MatrixSpring Spring(Func<Matrix4x4> getter, Action<Matrix4x4> setter,
-            Matrix4x4 target) => Spring<Matrix4x4, MatrixSpring>(getter, setter, target);
+        public static SpringAnimationId<Matrix4x4> Spring(Func<Matrix4x4> getter, Action<Matrix4x4> setter, Matrix4x4 target) =>
+            Spring(getter, setter, target, Motion.Spring.Default); 
+        public static SpringAnimationId<Matrix4x4> Spring(Func<Matrix4x4> getter, Action<Matrix4x4> setter, Matrix4x4 target, Spring spring) => 
+            Spring<Matrix4x4, MatrixSpring>(getter, setter, target, spring);
+
+        public static TweenAnimationId<int> Tween(Func<int> getter, Action<int> setter, int target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<int> Tween(Func<int> getter, Action<int> setter, int target, Tween tween) => 
+            Tween<int, IntTween>(getter, setter, target, tween);
         
-        public static IntTween Tween(Func<int> getter, Action<int> setter,
-            int target) => Tween<int, IntTween>(getter, setter, target);
-        
-        public static FloatTween Tween(Func<float> getter, Action<float> setter,
-            float target) => Tween<float, FloatTween>(getter, setter, target);
+        public static TweenAnimationId<float> Tween(Func<float> getter, Action<float> setter, float target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<float> Tween(Func<float> getter, Action<float> setter, float target, Tween tween) =>
+            Tween<float, FloatTween>(getter, setter, target, tween);
 
-        public static Vector2Tween Tween(Func<Vector2> getter, Action<Vector2> setter,
-            Vector2 target) => Tween<Vector2, Vector2Tween>(getter, setter, target);
+        public static TweenAnimationId<Vector2> Tween(Func<Vector2> getter, Action<Vector2> setter, Vector2 target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            }); 
+        public static TweenAnimationId<Vector2> Tween(Func<Vector2> getter, Action<Vector2> setter, Vector2 target, Tween tween) => 
+            Tween<Vector2, Vector2Tween>(getter, setter, target, tween);
 
-        public static Vector3Tween Tween(Func<Vector3> getter, Action<Vector3> setter,
-            Vector3 target) => Tween<Vector3, Vector3Tween>(getter, setter, target);
+        public static TweenAnimationId<Vector3> Tween(Func<Vector3> getter, Action<Vector3> setter, Vector3 target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<Vector3> Tween(Func<Vector3> getter, Action<Vector3> setter, Vector3 target, Tween tween) =>
+            Tween<Vector3, Vector3Tween>(getter, setter, target, tween);
 
-        public static Vector4Tween Tween(Func<Vector4> getter, Action<Vector4> setter,
-            Vector4 target) => Tween<Vector4, Vector4Tween>(getter, setter, target);
+        public static TweenAnimationId<Vector4> Tween(Func<Vector4> getter, Action<Vector4> setter, Vector4 target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<Vector4> Tween(Func<Vector4> getter, Action<Vector4> setter, Vector4 target, Tween tween) => 
+            Tween<Vector4, Vector4Tween>(getter, setter, target, tween);
 
-        public static ColorTween Tween(Func<Color> getter, Action<Color> setter,
-            Color target) => Tween<Color, ColorTween>(getter, setter, target);
+        public static TweenAnimationId<Color> Tween(Func<Color> getter, Action<Color> setter, Color target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<Color> Tween(Func<Color> getter, Action<Color> setter, Color target, Tween tween) => 
+            Tween<Color, ColorTween>(getter, setter, target, tween);
 
-        public static QuaternionTween Tween(Func<Quaternion> getter, Action<Quaternion> setter,
-            Quaternion target) => Tween<Quaternion, QuaternionTween>(getter, setter, target);
+        public static TweenAnimationId<Quaternion> Tween(Func<Quaternion> getter, Action<Quaternion> setter, Quaternion target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<Quaternion> Tween(Func<Quaternion> getter, Action<Quaternion> setter, Quaternion target, Tween tween) => 
+            Tween<Quaternion, QuaternionTween>(getter, setter, target, tween);
 
-        public static MatrixTween Tween(Func<Matrix4x4> getter, Action<Matrix4x4> setter,
-            Matrix4x4 target) => Tween<Matrix4x4, MatrixTween>(getter, setter, target);
+        public static TweenAnimationId<Matrix4x4> Tween(Func<Matrix4x4> getter, Action<Matrix4x4> setter, Matrix4x4 target, float duration = 1, Ease ease = Ease.Back) =>
+            Tween(getter, setter, target, new Tween
+            {
+                duration = duration,
+                ease = ease
+            });
+        public static TweenAnimationId<Matrix4x4> Tween(Func<Matrix4x4> getter, Action<Matrix4x4> setter, Matrix4x4 target, Tween tween) =>
+            Tween<Matrix4x4, MatrixTween>(getter, setter, target, tween);
 
-        public static Countdown Countdown(float time, Action callback)
+        public static CountdownId Countdown(float time, Action callback)
         {
             var animation = Instance.GetFromPool<Countdown>();
-            animation.Setup(time);
-            if(!animation.Valid)
-            {
-                Instance.ReturnToPool(Instance.ActiveAnimations.Count - 1);
-            }
+            animation.SetDuration(time);
             animation.OnComplete(callback);
             
-            return animation;
+            return new CountdownId(animation.Id);
+        }
+
+        internal static Animation GetAnimation(uint id)
+        {
+            return Instance.ActiveAnimationsById.TryGetValue(id, out var animation) ? animation : null;
         }
     }
 }

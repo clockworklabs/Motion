@@ -2,8 +2,7 @@
 using UnityEngine;
 
 namespace Motion
-{    
-    
+{
     [Serializable]
     public struct Tween : IEquatable<Tween>
     {

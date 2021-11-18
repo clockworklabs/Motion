@@ -3,6 +3,356 @@ using UnityEngine;
 
 namespace Motion
 {
+    
+    public readonly struct TweenAnimationId<T> where T : struct, IEquatable<T>
+    {
+        public readonly uint id;
+
+        public TweenAnimationId(uint id)
+        {
+            this.id = id;
+        }
+        
+        public bool HasStarted(out bool started)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                started = animation.Started;
+                return true;
+            }
+
+            started = false;
+            return false;
+        }
+        public bool IsPlaying(out bool playing)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                playing = animation.Playing;
+                return true;
+            }
+
+            playing = false;
+            return false;
+        }
+        public bool IsStopped(out bool stopped)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                stopped = animation.Stopped;
+                return true;
+            }
+
+            stopped = false;
+            return false;
+        }
+        public bool IsCompleted(out bool completed)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                completed = animation.Completed;
+                return true;
+            }
+
+            completed = false;
+            return false;
+        }
+        public bool IsActive(out bool active)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                active = animation.Active;
+                return true;
+            }
+
+            active = false;
+            return false;
+        }
+
+        public bool IsPaused(out bool paused)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                paused = animation.Paused;
+                return true;
+            }
+
+            paused = false;
+            return false;
+        }
+
+        public bool IsAutoPlay(out bool autoPlay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                autoPlay = animation.AutoPlay;
+                return true;
+            }
+
+            autoPlay = false;
+            return false;
+        }
+
+        public TweenAnimationId<T> OnStart(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.OnStart(callback);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> OnPlay(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.OnPlay(callback);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> OnPause(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.OnPause(callback);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> OnStop(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.OnStop(callback);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> OnComplete(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.OnComplete(callback);
+            }
+
+            return this;
+        }
+
+        public bool GetDelay(out float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                delay = animation.Delay;
+                return true;
+            }
+
+            delay = 0f;
+            return false;
+        }
+        
+        public TweenAnimationId<T> SetAutoPlay(bool autoPlay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.SetAutoPlay(autoPlay);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> SetDelay(float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.SetDelay(delay);
+            }
+
+            return this;
+        }
+
+        public void Play()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.Play();
+            }
+        }
+
+        public void Pause()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.Pause();
+            }
+        }
+
+        public void Stop(bool complete = false)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                animation.Stop(complete);
+            }
+        }
+
+        public TweenAnimationId<T> OnStep(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.OnStep(callback);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> OnLoop(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.OnLoop(callback);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> OnInterval(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.OnInterval(callback);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> SetLoops(int loops, LoopType type = LoopType.Restart)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.SetLoops(loops, type);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> SetInterval(int interval, float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.SetInterval(interval, delay);
+            }
+
+            return this;
+        }
+
+        public bool GetTween(out Tween tween)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tween = new Tween
+                {
+                    duration = tweenAnimation.Duration,
+                    ease = tweenAnimation.Ease
+                };
+                return true;
+            }
+
+            tween = default;
+            return false;
+        }
+
+        public bool GetEase(out Ease ease)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                ease = tweenAnimation.Ease;
+                return true;
+            }
+
+            ease = default;
+            return false;
+        }
+
+        public bool GetDuration(out float duration)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                duration = tweenAnimation.Duration;
+                return true;
+            }
+
+            duration = 0f;
+            return false;
+        }
+        
+        public TweenAnimationId<T> SetTween(Tween tween)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.SetTween(tween);
+            }
+
+            return this;
+        }
+
+        public TweenAnimationId<T> SetEase(Ease ease)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.SetEase(ease);
+            }
+
+            return this;
+        }
+        
+        public TweenAnimationId<T> SetDuration(float duration)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T> tweenAnimation)
+            {
+                tweenAnimation.SetDuration(duration);
+            }
+
+            return this;
+        }
+        
+        public static implicit operator uint(TweenAnimationId<T> animation) => animation.id;
+        public static implicit operator AnimationId<T>(TweenAnimationId<T> animation) => new AnimationId<T>(animation.id);
+        public static implicit operator AnimationId(TweenAnimationId<T> animation) => new AnimationId(animation.id);
+    }
+    
     public abstract class TweenAnimation<T> : Animation<T> where T : struct, IEquatable<T>
     {
         private const float C1 = 1.70158f;
@@ -13,28 +363,27 @@ namespace Motion
         private const float N1 =  7.5625f;
         private const float D1 =  1 / 2.75f;
             
-        private float inverseDuration;
+        private float _inverseDuration;
         private float InverseDuration
         {
-            get => inverseDuration;
+            get => _inverseDuration;
             set
             {
                 if (Started) return;
-                inverseDuration = value;
+                _inverseDuration = value;
             }
         }
 
-        public float Duration => 1 / InverseDuration;
+        internal float Duration => 1 / InverseDuration;
 
-        private Ease ease;
-        public Ease Ease
+        private Ease _ease;
+        internal Ease Ease
         {
-            get => ease;
+            get => _ease;
             private set
             {
                 if (Started) return;
-                
-                ease = value;
+                _ease = value;
             }
         }
 
@@ -48,26 +397,19 @@ namespace Motion
             Time = 0;
         }
 
-        internal void Setup(Func<T> getter, Action<T> setter, T target)
-        {
-            var origin = getter();
-            if (origin.Equals(target)) return;
-
-            Setup(getter, setter, origin, target);
-        }
-
         protected override void PrepareForLoop()
         {
             Time = 0;
         }
 
-        public TweenAnimation<T> SetTween(Tween tween)
+        internal void SetTween(Tween tween)
         {
-            Ease = tween.ease;
-            InverseDuration = 1 / tween.duration;
-
-            return this;
+            SetEase(tween.ease);
+            SetDuration(tween.duration);
         }
+
+        internal void SetEase(Ease ease) => Ease = ease;
+        internal void SetDuration(float duration) => InverseDuration = 1 / duration;
 
         protected override bool Tick(float deltaTime, ref T value) {
             Time = Mathf.Clamp01(Time + deltaTime * InverseDuration);
@@ -206,17 +548,17 @@ namespace Motion
                     }
                     else if (time < 2 * D1)
                     {
-                        time = time - 1.5f * D1;
+                        time -= 1.5f * D1;
                         t = N1 * time * time + 0.75f;
                     }
                     else if (time < 2.5f * D1)
                     {
-                        time = time - 2.25f * D1;
+                        time -= 2.25f * D1;
                         t = N1 * time * time + 0.9375f;
                     }
                     else
                     {
-                        time = time - 2.625f * D1;
+                        time -= 2.625f * D1;
                         t = N1 * time * time + 0.984375f;
                     }
 
@@ -233,17 +575,17 @@ namespace Motion
                     }
                     else if (time < 2 * D1)
                     {
-                        time = time - 1.5f * D1;
+                        time -= 1.5f * D1;
                         t = N1 * time * time + 0.75f;
                     }
                     else if (time < 2.5f * D1)
                     {
-                        time = time - 2.25f * D1;
+                        time -= 2.25f * D1;
                         t = N1 * time * time + 0.9375f;
                     }
                     else
                     {
-                        time = time - 2.625f * D1;
+                        time -= 2.625f * D1;
                         t = N1 * time * time + 0.984375f;
                     }
 

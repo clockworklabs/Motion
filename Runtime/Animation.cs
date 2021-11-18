@@ -4,66 +4,466 @@ namespace Motion
 {
     public delegate void RefAction<T>(ref T value) where T : struct;
     
+    public readonly struct AnimationId
+    {
+        public readonly uint id;
+
+        public AnimationId(uint id)
+        {
+            this.id = id;
+        }
+        
+        public bool HasStarted()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.Started ?? false;
+        }
+        public bool IsPlaying()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.Playing ?? false;
+        }
+        public bool IsStopped()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.Stopped ?? false;
+        }
+        public bool IsCompleted()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.Completed ?? false;
+        }
+        public bool IsActive()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.Active ?? false;
+        }
+
+        public bool IsPaused()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.Paused ?? false;
+        }
+
+        public bool IsAutoPlay()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.AutoPlay ?? false;
+        }
+
+        public AnimationId OnStart(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.OnStart(callback);
+
+            return this;
+        }
+
+        public AnimationId OnPlay(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.OnPlay(callback);
+
+            return this;
+        }
+
+        public AnimationId OnPause(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.OnPause(callback);
+
+            return this;
+        }
+
+        public AnimationId OnStop(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.OnStop(callback);
+
+            return this;
+        }
+
+        public AnimationId OnComplete(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.OnComplete(callback);
+
+            return this;
+        }
+
+        public float GetDelay()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            return animation?.Delay ?? 0f;
+        }
+        
+        public AnimationId SetAutoPlay(bool autoPlay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.SetAutoPlay(autoPlay);
+
+            return this;
+        }
+
+        public AnimationId SetDelay(float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.SetDelay(delay);
+
+            return this;
+        }
+
+        public void Play()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.Play();
+        }
+
+        public void Pause()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.Pause();
+        }
+
+        public void Stop(bool complete = false)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            animation?.Stop(complete);
+        }
+        
+        public static implicit operator uint(AnimationId animation) => animation.id;
+    }
+    
+    public readonly struct AnimationId<T> where T : struct, IEquatable<T>
+    {
+        public readonly uint id;
+
+        public AnimationId(uint id)
+        {
+            this.id = id;
+        }
+        
+        public bool HasStarted(out bool started)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                started = animation.Started;
+                return true;
+            }
+
+            started = false;
+            return false;
+        }
+        public bool IsPlaying(out bool playing)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                playing = animation.Playing;
+                return true;
+            }
+
+            playing = false;
+            return false;
+        }
+        public bool IsStopped(out bool stopped)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                stopped = animation.Stopped;
+                return true;
+            }
+
+            stopped = false;
+            return false;
+        }
+        public bool IsCompleted(out bool completed)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                completed = animation.Completed;
+                return true;
+            }
+
+            completed = false;
+            return false;
+        }
+        public bool IsActive(out bool active)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                active = animation.Active;
+                return true;
+            }
+
+            active = false;
+            return false;
+        }
+
+        public bool IsPaused(out bool paused)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                paused = animation.Paused;
+                return true;
+            }
+
+            paused = false;
+            return false;
+        }
+
+        public bool IsAutoPlay(out bool autoPlay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                autoPlay = animation.AutoPlay;
+                return true;
+            }
+
+            autoPlay = false;
+            return false;
+        }
+
+        public AnimationId<T> OnStart(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.OnStart(callback);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> OnPlay(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.OnPlay(callback);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> OnPause(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.OnPause(callback);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> OnStop(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.OnStop(callback);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> OnComplete(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.OnComplete(callback);
+            }
+
+            return this;
+        }
+
+        public bool GetDelay(out float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                delay = animation.Delay;
+                return true;
+            }
+
+            delay = 0f;
+            return false;
+        }
+        
+        public AnimationId<T> SetAutoPlay(bool autoPlay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.SetAutoPlay(autoPlay);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> SetDelay(float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.SetDelay(delay);
+            }
+
+            return this;
+        }
+
+        public void Play()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.Play();
+            }
+        }
+
+        public void Pause()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.Pause();
+            }
+        }
+
+        public void Stop(bool complete = false)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T>)
+            {
+                animation.Stop(complete);
+            }
+        }
+
+        public AnimationId<T> OnStep(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T> tAnimation)
+            {
+                tAnimation.OnStep(callback);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> OnLoop(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T> tAnimation)
+            {
+                tAnimation.OnLoop(callback);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> OnInterval(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T> tAnimation)
+            {
+                tAnimation.OnInterval(callback);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> SetLoops(int loops, LoopType type = LoopType.Restart)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T> tAnimation)
+            {
+                tAnimation.SetLoops(loops, type);
+            }
+
+            return this;
+        }
+
+        public AnimationId<T> SetInterval(int interval, float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is Animation<T> tAnimation)
+            {
+                tAnimation.SetInterval(interval, delay);
+            }
+
+            return this;
+        }
+        
+        public static implicit operator uint(AnimationId<T> animation) => animation.id;
+        public static implicit operator AnimationId(AnimationId<T> animation) => new AnimationId(animation.id);
+    }
+    
     public abstract class Animation
     {
-        private static uint nextId;
+        public uint Id { get; internal set; }
 
-        public uint ID { get; }
-
-        private bool started;
-        public bool Started
+        private bool _started;
+        internal bool Started
         {
-            get => started;
+            get => _started;
             private set
             {
-                if (started == value) return;
+                if (_started == value) return;
                 
-                started = value;
+                _started = value;
                 if (value)
                 {
                     OnStartCallback?.Invoke();
                 }
             }
         }
-        private bool playing;
-        public bool Playing
+        private bool _playing;
+        internal bool Playing
         {
-            get => playing;
+            get => _playing;
             private set
             {
-                if (playing == value) return;
+                if (_playing == value) return;
                 
-                playing = value;
+                _playing = value;
                 if (value)
                 {
                     OnPlayCallback?.Invoke();
                 }
             }
         }
-        private bool stopped;
-        public bool Stopped
+        private bool _stopped;
+        internal bool Stopped
         {
-            get => stopped;
+            get => _stopped;
             private set
             {
-                if (stopped == value) return;
+                if (_stopped == value) return;
                 
-                stopped = value;
+                _stopped = value;
                 if (value)
                 {
                     OnStopCallback?.Invoke();
                 }
             }
         }
-        private bool completed;
-        public bool Completed
+        private bool _completed;
+        internal bool Completed
         {
-            get => completed;
+            get => _completed;
             private set
             {
-                if (completed == value) return;
+                if (_completed == value) return;
                 
-                completed = value;
+                _completed = value;
                 if (value)
                 {
                     OnCompleteCallback?.Invoke();
@@ -71,163 +471,104 @@ namespace Motion
             }
         }
 
-        public bool Valid { get; protected set; }
-        public bool Active => Valid && !Completed && !Stopped;
-        public bool Paused => Active && Started && !Playing;
+        internal bool Active => !Completed && !Stopped;
+        internal bool Paused => Active && Started && !Playing;
         
-        private bool autoPlay;
-        public bool AutoPlay
+        private bool _autoPlay;
+        internal bool AutoPlay
         {
-            get => autoPlay;
-            protected set
+            get => _autoPlay;
+            private set
             {
                 if (Started) return;
 
-                autoPlay = value;
-            }
-        }
-
-        private object owner;
-        public object Owner
-        {
-            get => owner;
-            protected set
-            {
-                if (Started) return;
-
-                owner = value;
+                _autoPlay = value;
             }
         }
         
-        private Action onStartCallback;
-        public Action OnStartCallback
+        private Action _onStartCallback;
+
+        private Action OnStartCallback
         {
-            get => onStartCallback;
-            protected set
+            get => _onStartCallback;
+            set
             {
                 if (Started) return;
                 
-                onStartCallback = value;
+                _onStartCallback = value;
             }
         }
-        private Action onPlayCallback;
-        public Action OnPlayCallback
+        private Action _onPlayCallback;
+        private Action OnPlayCallback
         {
-            get => onPlayCallback;
-            protected set
+            get => _onPlayCallback;
+            set
             {
                 if (Started) return;
                 
-                onPlayCallback = value;
+                _onPlayCallback = value;
             }
         }
-        private Action onPauseCallback;
-        public Action OnPauseCallback
+        private Action _onPauseCallback;
+        private Action OnPauseCallback
         {
-            get => onPauseCallback;
-            protected set
+            get => _onPauseCallback;
+            set
             {
                 if (Started) return;
                 
-                onPauseCallback = value;
+                _onPauseCallback = value;
             }
         }
-        private Action onStopCallback;
-        public Action OnStopCallback
+        private Action _onStopCallback;
+        private Action OnStopCallback
         {
-            get => onStopCallback;
-            protected set
+            get => _onStopCallback;
+            set
             {
                 if (Started) return;
                 
-                onStopCallback = value;
+                _onStopCallback = value;
             }
         }
-        private Action onCompleteCallback;
-        public Action OnCompleteCallback {
-            get => onCompleteCallback;
-            protected set
+        private Action _onCompleteCallback;
+        private Action OnCompleteCallback {
+            get => _onCompleteCallback;
+            set
             {
                 if (Started) return;
                 
-                onCompleteCallback = value;
+                _onCompleteCallback = value;
             }
         }
 
-        private float delay;
-        public float Delay
+        private float _delay;
+        internal float Delay
         {
-            get => delay;
-            protected set
+            get => _delay;
+            private set
             {
                 if (Started) return;
                 
-                delay = value;
+                _delay = value;
             }
         }
 
         private float Time { get; set; }
 
-        protected Animation()
-        {
-            ID = nextId++;
-        }
+        internal virtual void SetAutoPlay(bool autoPlay) => AutoPlay = autoPlay;
 
-        public virtual Animation SetAutoPlay(bool autoPlay)
-        {
-            AutoPlay = autoPlay;
+        internal void OnStart(Action callback) => OnStartCallback = callback;
 
-            return this;
-        }
+        internal void OnPlay(Action callback) => OnPlayCallback = callback;
 
-        public virtual Animation SetOwner(object owner)
-        {
-            Owner = owner;
+        internal void OnPause(Action callback) => OnPauseCallback = callback;
 
-            return this;
-        }
+        internal void OnStop(Action callback) => OnStopCallback = callback;
 
-        public Animation OnStart(Action callback)
-        {
-            OnStartCallback = callback;
+        internal void OnComplete(Action callback) => OnCompleteCallback = callback;
 
-            return this;
-        }
-
-        public Animation OnPlay(Action callback)
-        {
-            OnPlayCallback = callback;
-
-            return this;
-        }
-
-        public Animation OnPause(Action callback)
-        {
-            OnPauseCallback = callback;
-
-            return this;
-        }
-
-        public Animation OnStop(Action callback)
-        {
-            OnStopCallback = callback;
-
-            return this;
-        }
-
-        public Animation OnComplete(Action callback)
-        {
-            OnCompleteCallback = callback;
-
-            return this;
-        }
-
-        public virtual Animation SetDelay(float delay)
-        {
-            Delay = delay;
-
-            return this;
-        }
+        internal virtual void SetDelay(float delay) => Delay = delay;
 
         internal virtual void Reset()
         {
@@ -241,34 +582,28 @@ namespace Motion
             Playing = false;
             Stopped = false;
             Completed = false;
-            Valid = false;
 
             AutoPlay = true;
-            
-            Owner = null;
             
             Delay = 0;
             
             Time = 0;
         }
 
-        public virtual void Play()
+        internal virtual void Play()
         {
             Started = true;
             Playing = true;
         }
         
-        public virtual void Pause()
+        internal virtual void Pause()
         {
             Playing = false;
         }
 
-        public void Stop(bool complete) => Stop(complete, null);
-        public void Stop(object owner) => Stop(false, owner);
-        public void Stop(bool complete = false, object owner = null)
+        internal void Stop(bool complete)
         {
             if (!Active) return;
-            if (Owner != null && Owner != owner) return;
             
             OnStop(complete);
 
@@ -308,89 +643,89 @@ namespace Motion
     
     public abstract class Animation<T> : Animation where T : struct, IEquatable<T>
     {
-        private Func<T> Getter { get; set; }
-        private Action<T> Setter { get; set; }
+        protected Func<T> Getter { get; private set; }
+        protected Action<T> Setter { get; private set; }
         
         protected T Origin { get; private set; }
         protected T Target { get; private set; }
         
-        private Action onStepCallback;
-        public Action OnStepCallback {
-            get => onStepCallback;
-            protected set
+        private Action _onStepCallback;
+        private Action OnStepCallback {
+            get => _onStepCallback;
+            set
             {
                 if (Started) return;
                 
-                onStepCallback = value;
+                _onStepCallback = value;
             }
         }
-        private Action onLoopCallback;
-        public Action OnLoopCallback
+        private Action _onLoopCallback;
+        private Action OnLoopCallback
         {
-            get => onLoopCallback;
-            protected set
+            get => _onLoopCallback;
+            set
             {
                 if (Started) return;
                 
-                onLoopCallback = value;
+                _onLoopCallback = value;
             }
         }
-        private Action onIntervalCallback;
-        public Action OnIntervalCallback {
-            get => onIntervalCallback;
-            protected set
+        private Action _onIntervalCallback;
+        private Action OnIntervalCallback {
+            get => _onIntervalCallback;
+            set
             {
                 if (Started) return;
                 
-                onIntervalCallback = value;
+                _onIntervalCallback = value;
             }
         }
 
-        private int loopsCount;
-        public int LoopsCount
+        private int _loopsCount;
+        private int LoopsCount
         {
-            get => loopsCount;
-            protected set
+            get => _loopsCount;
+            set
             {
                 if (Started) return;
 
-                loopsCount = value;
+                _loopsCount = value;
             }
         }
 
-        private LoopType loopType;
-        public LoopType LoopType
+        private LoopType _loopType;
+        private LoopType LoopType
         {
-            get => loopType;
-            protected set
-            {
-                if (Started) return;
-                
-                loopType = value;
-            }
-        }
-
-        private int interval;
-        public int Interval
-        {
-            get => interval;
-            protected set
-            {
-                if (Started) return;
-
-                interval = value;
-            }
-        }
-
-        private float intervalDelay;
-        public float IntervalDelay
-        {
-            get => intervalDelay;
-            protected set
+            get => _loopType;
+            set
             {
                 if (Started) return;
                 
-                intervalDelay = value;
+                _loopType = value;
+            }
+        }
+
+        private int _interval;
+        private int Interval
+        {
+            get => _interval;
+            set
+            {
+                if (Started) return;
+
+                _interval = value;
+            }
+        }
+
+        private float _intervalDelay;
+        private float IntervalDelay
+        {
+            get => _intervalDelay;
+            set
+            {
+                if (Started) return;
+                
+                _intervalDelay = value;
             }
         }
         
@@ -398,40 +733,22 @@ namespace Motion
         private bool IsInterval { get; set; }
         private float Accum { get; set; }
         
-        public Animation<T> OnStep(Action callback)
-        {
-            OnStepCallback = callback;
+        internal void OnStep(Action callback) => OnStepCallback = callback;
+        
+        internal void OnLoop(Action callback) => OnLoopCallback = callback;
 
-            return this;
-        }
-        public Animation<T> OnLoop(Action callback)
-        {
-            OnLoopCallback = callback;
+        internal void OnInterval(Action callback) => OnIntervalCallback = callback;
 
-            return this;
-        }
-
-        public Animation<T> OnInterval(Action callback)
-        {
-            OnIntervalCallback = callback;
-
-            return this;
-        }
-
-        public Animation<T> SetLoops(int loops, LoopType loopType = LoopType.Restart)
+        internal void SetLoops(int loops, LoopType loopType)
         {
             LoopsCount = loops;
             LoopType = loopType;
-
-            return this;
         }
 
-        public Animation<T> SetInterval(int interval, float delay = 0)
+        internal void SetInterval(int interval, float delay)
         {
             Interval = interval;
             IntervalDelay = delay;
-
-            return this;
         }
 
         internal override void Reset()
@@ -455,11 +772,9 @@ namespace Motion
             Loop = 0;
         }
         
-        protected void Setup(Func<T> getter, Action<T> setter, T origin, T target)
+        internal virtual void Setup(Func<T> getter, Action<T> setter, T target)
         {
-            Valid = true;
-            
-            Origin = origin;
+            Origin = getter();
             Target = target;
             Getter = getter;
             Setter = setter;

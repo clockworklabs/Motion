@@ -3,6 +3,340 @@ using UnityEngine;
 
 namespace Motion
 {
+    public readonly struct SpringAnimationId<T> where T : struct, IEquatable<T>
+    {
+        public readonly uint id;
+
+        public SpringAnimationId(uint id)
+        {
+            this.id = id;
+        }
+        
+        public bool HasStarted(out bool started)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                started = animation.Started;
+                return true;
+            }
+
+            started = false;
+            return false;
+        }
+        public bool IsPlaying(out bool playing)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                playing = animation.Playing;
+                return true;
+            }
+
+            playing = false;
+            return false;
+        }
+        public bool IsStopped(out bool stopped)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                stopped = animation.Stopped;
+                return true;
+            }
+
+            stopped = false;
+            return false;
+        }
+        public bool IsCompleted(out bool completed)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                completed = animation.Completed;
+                return true;
+            }
+
+            completed = false;
+            return false;
+        }
+        public bool IsActive(out bool active)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                active = animation.Active;
+                return true;
+            }
+
+            active = false;
+            return false;
+        }
+
+        public bool IsPaused(out bool paused)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                paused = animation.Paused;
+                return true;
+            }
+
+            paused = false;
+            return false;
+        }
+
+        public bool IsAutoPlay(out bool autoPlay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                autoPlay = animation.AutoPlay;
+                return true;
+            }
+
+            autoPlay = false;
+            return false;
+        }
+
+        public SpringAnimationId<T> OnStart(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.OnStart(callback);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> OnPlay(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.OnPlay(callback);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> OnPause(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.OnPause(callback);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> OnStop(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.OnStop(callback);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> OnComplete(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.OnComplete(callback);
+            }
+
+            return this;
+        }
+
+        public bool GetDelay(out float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                delay = animation.Delay;
+                return true;
+            }
+
+            delay = 0f;
+            return false;
+        }
+        
+        public SpringAnimationId<T> SetAutoPlay(bool autoPlay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.SetAutoPlay(autoPlay);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> SetDelay(float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.SetDelay(delay);
+            }
+
+            return this;
+        }
+
+        public void Play()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.Play();
+            }
+        }
+
+        public void Pause()
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.Pause();
+            }
+        }
+
+        public SpringAnimationId<T> Stop(bool complete = false)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T>)
+            {
+                animation.Stop(complete);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> OnStep(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.OnStep(callback);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> OnLoop(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.OnLoop(callback);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> OnInterval(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.OnInterval(callback);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> SetLoops(int loops, LoopType type = LoopType.Restart)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.SetLoops(loops, type);
+            }
+
+            return this;
+        }
+
+        public SpringAnimationId<T> SetInterval(int interval, float delay)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.SetInterval(interval, delay);
+            }
+
+            return this;
+        }
+
+        public bool GetSpring(out Spring spring)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                spring = springAnimation.Spring;
+                return true;
+            }
+
+            spring = default;
+            return false;
+        }
+
+        public bool GetVelocity(out T velocity)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                velocity = springAnimation.Velocity;
+                return true;
+            }
+
+            velocity = default;
+            return false;
+        }
+        
+        public SpringAnimationId<T> SetTarget(T target)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.SetTarget(target);
+            } 
+
+            return this;
+        }
+
+        public SpringAnimationId<T> SetSpring(Spring spring)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.SetSpring(spring);
+            } 
+
+            return this;
+        }
+
+        public SpringAnimationId<T> SetInitialVelocity(T velocity)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                springAnimation.SetInitialVelocity(velocity);
+            } 
+
+            return this;
+        }
+        
+        public static implicit operator uint(SpringAnimationId<T> animation) => animation.id;
+        public static implicit operator AnimationId<T>(SpringAnimationId<T> animation) => new AnimationId<T>(animation.id);
+        public static implicit operator AnimationId(SpringAnimationId<T> animation) => new AnimationId(animation.id);
+    }
+    
     public abstract class SpringAnimation<T> : Animation<T> where T : struct, IEquatable<T>
     {
         private Spring _spring;
@@ -22,13 +356,10 @@ namespace Motion
         private float OmegaZeta { get; set; }
         private T X0 { get; set; }
         private T V0 { get; set; }
-        private float ElapsedTime { get; set; } = 0;
+        private float ElapsedTime { get; set; }
         private DampingProfile DampingProfile { get; set; }
 
         public T Velocity { get; private set; }
-
-        private Func<T> Getter { get; set; }
-        private Action<T> Setter { get; set; }
 
         internal override void Reset()
         {
@@ -40,17 +371,11 @@ namespace Motion
             ElapsedTime = 0;
         }
 
-        internal void Setup(Func<T> getter, Action<T> setter, T target)
+        internal override void Setup(Func<T> getter, Action<T> setter, T target)
         {
-            Getter = getter;
-            Setter = setter;
+            base.Setup(getter, setter, target);
             
-            var origin = getter();
-            if (origin.Equals(target)) return;
-
-            X0 = Subtract(target, origin);
-
-            Setup(getter, setter, origin, target);
+            X0 = Subtract(target, Origin);
         }
 
         protected override void PrepareForLoop()
@@ -59,23 +384,14 @@ namespace Motion
             ElapsedTime = 0;
         }
 
-        public SpringAnimation<T> UpdateTarget(T target)
+        internal void SetTarget(T target)
         {
-            var origin = Getter();
-            if (origin.Equals(target))
-            {
-                return this;
-            }
-
-            X0 = Subtract(target, origin);
             ElapsedTime = 0;
 
-            Setup(Getter, Setter, origin, target);
-            
-            return this;
+            Setup(Getter, Setter, target);
         }
 
-        public SpringAnimation<T> SetSpring(Spring spring)
+        internal void SetSpring(Spring spring)
         {
             Spring = spring;
 
@@ -95,19 +411,15 @@ namespace Motion
             {
                 DampingProfile = DampingProfile.UnderDamped;
             }
-
-            return this;
         }
 
-        public SpringAnimation<T> SetInitialVelocity(T velocity)
+        internal void SetInitialVelocity(T velocity)
         {
-            if (Started) return this;
+            if (Started) return;
 
             Velocity = velocity;
 
             V0 = Multiply(Velocity, -1);
-
-            return this;
         }
 
         protected override bool Tick(float deltaTime, ref T value)
@@ -185,6 +497,17 @@ namespace Motion
         protected abstract T Subtract(T a, T b);
         protected abstract T Multiply(T a, float b);
         protected abstract float SqrMagnitude(T a);
+        
+        public static T GetVelocity(uint id)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is SpringAnimation<T> springAnimation)
+            {
+                return springAnimation.Velocity;
+            }
+
+            return default;
+        }
     }
 
     internal enum DampingProfile
