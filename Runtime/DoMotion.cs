@@ -28,6 +28,7 @@ namespace Motion
             if (Instance != this)
             {
                 Destroy(gameObject);
+                return;
             }
             
             DontDestroyOnLoad(this);
