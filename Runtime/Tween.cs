@@ -1,10 +1,9 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Motion
 {
     [Serializable]
-    public struct Tween : IEquatable<Tween>
+    public struct Tween
     {
         public Ease ease;
         public float duration;
@@ -20,7 +19,5 @@ namespace Motion
             ease = Ease.Back,
             duration = 1
         };
-
-        public bool Equals(Tween other) => ease == other.ease && Mathf.Approximately(duration, other.duration);
     }
 }

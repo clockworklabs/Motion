@@ -1,10 +1,9 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Motion
 {
     [Serializable]
-    public struct Spring : IEquatable<Spring>
+    public struct Spring
     {
         public float stiffness;
         public float inverseMass;
@@ -50,31 +49,5 @@ namespace Motion
             sqrRestSpeed = 0.05f * 0.05f,
             sqrRestDelta = 0.05f * 0.05f
         };
-
-        public bool Equals(Spring other)
-        {
-            if (!Mathf.Approximately(stiffness, other.stiffness))
-            {
-                return false;
-            }
-            if (!Mathf.Approximately(inverseMass, other.inverseMass))
-            {
-                return false;
-            }
-            if (!Mathf.Approximately(damping, other.damping))
-            {
-                return false;
-            }
-            if (!Mathf.Approximately(sqrRestSpeed, other.sqrRestSpeed))
-            {
-                return false;
-            }
-            if (!Mathf.Approximately(sqrRestDelta, other.sqrRestDelta))
-            {
-                return false;
-            }
-
-            return true;
-        }
     }
 }

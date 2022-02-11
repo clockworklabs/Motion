@@ -1,16 +1,16 @@
 {
   "name": "com.clockworklabs.motion",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "displayName": "Motion",
   "description": "Animation library for Unity",
-  "unity": "2019.4",
+  "unity": "2020.3",
   "author": {
     "name": "Lisandro Crespo",
     "email": "hey@lisandroct.com",
     "url": "https://lisandroct.com"
   },
   "dependencies": {
-    "com.unity.collections": "0.9.0-preview.6"
+    "com.unity.collections": "1.1.0"
   },
   "type": "library"
 }
