@@ -621,8 +621,8 @@ namespace Motion
         internal void Step(float deltaTime)
         {
             if (!Active) return;
-
-            if (Paused) return;
+            if (!Started) return;
+            if (!Playing) return;
 
             Time += deltaTime;
             if (Time < Delay)
