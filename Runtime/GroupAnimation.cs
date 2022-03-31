@@ -217,6 +217,31 @@ namespace Motion
             }
         }
         
+        public bool GetCount(out int count)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is GroupAnimation groupAnimation)
+            {
+                count = groupAnimation.Count;
+                return true;
+            }
+
+            count = 0;
+            return false;
+        }
+        
+        public bool Get(int index, out AnimationId animation)
+        {
+            if (DoMotion.GetAnimation(id) is GroupAnimation groupAnimation)
+            {
+                animation = groupAnimation.GetAnimation(index);
+                return true;
+            }
+
+            animation = default;
+            return false;
+        }
+        
         public static implicit operator uint(GroupAnimationId animation) => animation.id;
         public static implicit operator AnimationId(GroupAnimationId animation) => new AnimationId(animation.id);
     }
@@ -224,6 +249,8 @@ namespace Motion
     public class GroupAnimation : Animation
     {
         private List<AnimationId> Animations { get; } = new List<AnimationId>();
+
+        internal int Count => Animations.Count;
 
         internal override void Reset()
         {
@@ -315,5 +342,7 @@ namespace Motion
             
             Animations.Clear();
         }
+
+        internal AnimationId GetAnimation(int index) => Animations[index];
     }
 }

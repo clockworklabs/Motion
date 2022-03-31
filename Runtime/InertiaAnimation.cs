@@ -439,10 +439,7 @@ namespace Motion
             
             Origin = Getter();
             
-            var sign = Mathf.Sign(InitialVelocity);
-            var diff = Mathf.Pow(Mathf.Abs(InitialVelocity), Inertia.power) * sign;
-
-            Target = Origin + diff;
+            Target = Origin + InitialVelocity * Inertia.power;
             
             if (Mathf.Approximately(Origin, Target) && Origin > Min && Origin < Max)
             {
