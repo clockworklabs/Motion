@@ -55,7 +55,7 @@ namespace Motion
 
         protected override Color Multiply(Color a, float b) => a * b;
 
-        protected override float SqrMagnitude(Color a) => a.r * a.r + a.g * a.g + a.b * a.b + a.a + a.a;
+        protected override float SqrMagnitude(Color a) => a.r * a.r + a.g * a.g + a.b * a.b + a.a * a.a;
     }
     
     public class QuaternionSpring : SpringAnimation<Quaternion>

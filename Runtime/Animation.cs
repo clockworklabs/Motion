@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
@@ -11,6 +12,14 @@ namespace Motion
         public AnimationId(uint id)
         {
             this.id = id;
+        }
+
+        public T As<T>() where T : Animation => DoMotion.GetAnimation(id) as T;
+        public bool Is<T>() where T : Animation => As<T>() != null;
+        public bool Is<T>(out T animation) where T : Animation
+        {
+            animation = As<T>();
+            return animation != null;
         }
         
         public bool HasStarted()
@@ -403,7 +412,7 @@ namespace Motion
         }
         
         public static implicit operator uint(AnimationId<T> animation) => animation.id;
-        public static implicit operator AnimationId(AnimationId<T> animation) => new AnimationId(animation.id);
+        public static implicit operator AnimationId(AnimationId<T> animation) => new (animation.id);
     }
     
     public abstract class Animation
@@ -417,11 +426,14 @@ namespace Motion
             private set
             {
                 if (_started == value) return;
-                
+                if (value)
+                {
+                    AboutToStartCallback?.Invoke();
+                }
                 _started = value;
                 if (value)
                 {
-                    OnStartCallback?.Invoke();
+                    StartCallback?.Invoke();
                 }
             }
         }
@@ -436,7 +448,7 @@ namespace Motion
                 _playing = value;
                 if (value)
                 {
-                    OnPlayCallback?.Invoke();
+                    PlayCallback?.Invoke();
                 }
             }
         }
@@ -451,7 +463,7 @@ namespace Motion
                 _stopped = value;
                 if (value)
                 {
-                    OnStopCallback?.Invoke();
+                    StopCallback?.Invoke();
                 }
             }
         }
@@ -466,7 +478,7 @@ namespace Motion
                 _completed = value;
                 if (value)
                 {
-                    OnCompleteCallback?.Invoke();
+                    CompleteCallback?.Invoke();
                 }
             }
         }
@@ -486,61 +498,12 @@ namespace Motion
             }
         }
         
-        private Action _onStartCallback;
-
-        private Action OnStartCallback
-        {
-            get => _onStartCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onStartCallback = value;
-            }
-        }
-        private Action _onPlayCallback;
-        private Action OnPlayCallback
-        {
-            get => _onPlayCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onPlayCallback = value;
-            }
-        }
-        private Action _onPauseCallback;
-        private Action OnPauseCallback
-        {
-            get => _onPauseCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onPauseCallback = value;
-            }
-        }
-        private Action _onStopCallback;
-        private Action OnStopCallback
-        {
-            get => _onStopCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onStopCallback = value;
-            }
-        }
-        private Action _onCompleteCallback;
-        private Action OnCompleteCallback {
-            get => _onCompleteCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onCompleteCallback = value;
-            }
-        }
+        private Action AboutToStartCallback { get; set; }
+        private Action StartCallback { get; set; }
+        private Action PlayCallback { get; set; }
+        private Action PauseCallback { get; set; }
+        private Action StopCallback { get; set; }
+        private Action CompleteCallback { get; set; }
 
         private float _delay;
         internal float Delay
@@ -556,27 +519,30 @@ namespace Motion
 
         private float Time { get; set; }
 
-        internal virtual void SetAutoPlay(bool autoPlay) => AutoPlay = autoPlay;
+        public virtual void SetAutoPlay(bool autoPlay) => AutoPlay = autoPlay;
 
-        internal void OnStart(Action callback) => OnStartCallback = callback;
+        // TODO: Expose in every ID struct
+        public void OnAboutToStart(Action callback) => AboutToStartCallback = callback;
+        public void OnStart(Action callback) => StartCallback = callback;
 
-        internal void OnPlay(Action callback) => OnPlayCallback = callback;
+        public void OnPlay(Action callback) => PlayCallback = callback;
 
-        internal void OnPause(Action callback) => OnPauseCallback = callback;
+        public void OnPause(Action callback) => PauseCallback = callback;
 
-        internal void OnStop(Action callback) => OnStopCallback = callback;
+        public void OnStop(Action callback) => StopCallback = callback;
 
-        internal void OnComplete(Action callback) => OnCompleteCallback = callback;
+        public void OnComplete(Action callback) => CompleteCallback = callback;
 
-        internal virtual void SetDelay(float delay) => Delay = delay;
+        public virtual void SetDelay(float delay) => Delay = delay;
 
         internal virtual void Reset()
         {
-            OnStartCallback = null;
-            OnPlayCallback = null;
-            OnPauseCallback = null;
-            OnStopCallback = null;
-            OnCompleteCallback = null;
+            AboutToStartCallback = null;
+            StartCallback = null;
+            PlayCallback = null;
+            PauseCallback = null;
+            StopCallback = null;
+            CompleteCallback = null;
 
             Started = false;
             Playing = false;
@@ -590,18 +556,18 @@ namespace Motion
             Time = 0;
         }
 
-        internal virtual void Play()
+        public virtual void Play()
         {
             Started = true;
             Playing = true;
         }
         
-        internal virtual void Pause()
+        public virtual void Pause()
         {
             Playing = false;
         }
 
-        internal void Stop(bool complete)
+        public void Stop(bool complete)
         {
             if (!Active) return;
             
@@ -649,37 +615,9 @@ namespace Motion
         protected T Origin { get; private set; }
         protected T Target { get; private set; }
         
-        private Action _onStepCallback;
-        private Action OnStepCallback {
-            get => _onStepCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onStepCallback = value;
-            }
-        }
-        private Action _onLoopCallback;
-        private Action OnLoopCallback
-        {
-            get => _onLoopCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onLoopCallback = value;
-            }
-        }
-        private Action _onIntervalCallback;
-        private Action OnIntervalCallback {
-            get => _onIntervalCallback;
-            set
-            {
-                if (Started) return;
-                
-                _onIntervalCallback = value;
-            }
-        }
+        private Action StepCallback { get; set; }
+        private Action LoopCallback { get; set; }
+        private Action IntervalCallback { get; set; }
 
         private int _loopsCount;
         private int LoopsCount
@@ -732,20 +670,22 @@ namespace Motion
         private int Loop { get; set; }
         private bool IsInterval { get; set; }
         private float Accum { get; set; }
-        
-        internal void OnStep(Action callback) => OnStepCallback = callback;
-        
-        internal void OnLoop(Action callback) => OnLoopCallback = callback;
 
-        internal void OnInterval(Action callback) => OnIntervalCallback = callback;
+        public T Velocity { get; protected set; }
+        
+        public void OnStep(Action callback) => StepCallback = callback;
+        
+        public void OnLoop(Action callback) => LoopCallback = callback;
 
-        internal void SetLoops(int loops, LoopType loopType)
+        public void OnInterval(Action callback) => IntervalCallback = callback;
+
+        public void SetLoops(int loops, LoopType loopType)
         {
             LoopsCount = loops;
             LoopType = loopType;
         }
 
-        internal void SetInterval(int interval, float delay)
+        public void SetInterval(int interval, float delay)
         {
             Interval = interval;
             IntervalDelay = delay;
@@ -758,9 +698,9 @@ namespace Motion
             Setter = null;
             Origin = default;
             Target = default;
-            OnStepCallback = null;
-            OnLoopCallback = null;
-            OnIntervalCallback = null;
+            StepCallback = null;
+            LoopCallback = null;
+            IntervalCallback = null;
             IsInterval = false;
             Accum = 0;
             
@@ -770,6 +710,8 @@ namespace Motion
             IntervalDelay = 0;
             
             Loop = 0;
+            
+            Velocity = default;
         }
         
         internal virtual void Setup(Func<T> getter, Action<T> setter, T target)
@@ -782,9 +724,7 @@ namespace Motion
 
         private void SwapOriginAndTarget()
         {
-            var temp = Origin;
-            Origin = Target;
-            Target = temp;
+            (Origin, Target) = (Target, Origin);
         }
 
         protected abstract void PrepareForLoop();
@@ -818,7 +758,7 @@ namespace Motion
             var value = Getter();
             var done = Tick(deltaTime, ref value);
             
-            OnStepCallback?.Invoke();
+            StepCallback?.Invoke();
             
             Setter(value);
             
@@ -832,10 +772,10 @@ namespace Motion
 
             if (LoopsCount > 0 && Loop >= LoopsCount)
             {
-                OnLoopCallback?.Invoke();
+                LoopCallback?.Invoke();
                 if (IsInterval)
                 {
-                    OnIntervalCallback?.Invoke();
+                    IntervalCallback?.Invoke();
                 }
 
                 return true;
@@ -849,10 +789,10 @@ namespace Motion
             PrepareForLoop();
             Setter(Origin);
             
-            OnLoopCallback?.Invoke();
+            LoopCallback?.Invoke();
             if (IsInterval)
             {
-                OnIntervalCallback?.Invoke();
+                IntervalCallback?.Invoke();
             }
             
             return false;

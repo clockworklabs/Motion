@@ -417,6 +417,7 @@ namespace Motion
             if (Time >= 1)
             {
                 value = Target;
+                Velocity = default;
                 return true;
             }
 
@@ -621,14 +622,18 @@ namespace Motion
                 }
                 default:
                     value = Target;
+                    Velocity = default;
                     return true;
             }
 
+            var prev = value;
             value = LinearInterpolation(Origin, Target, t);
+            Velocity = GetVelocity(prev, value, deltaTime);
 
             return false;
         }
 
         protected abstract T LinearInterpolation(T a, T b, float t);
+        protected abstract T GetVelocity(T a, T b, float dt);
     }
 }

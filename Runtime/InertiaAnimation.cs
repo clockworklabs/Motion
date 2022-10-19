@@ -433,7 +433,7 @@ namespace Motion
             Setter = setter;
         }
 
-        internal override void Play()
+        public override void Play()
         {
             base.Play();
             

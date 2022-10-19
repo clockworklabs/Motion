@@ -100,6 +100,17 @@ namespace Motion
             return false;
         }
 
+        public GroupAnimationId OnAboutToStart(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is GroupAnimation)
+            {
+                animation.OnAboutToStart(callback);
+            }
+
+            return this;
+        }
+
         public GroupAnimationId OnStart(Action callback)
         {
             var animation = DoMotion.GetAnimation(id);
@@ -259,7 +270,7 @@ namespace Motion
             Animations.Clear();
         }
 
-        internal override void SetAutoPlay(bool autoPlay)
+        public override void SetAutoPlay(bool autoPlay)
         {
             base.SetAutoPlay(autoPlay);
             
@@ -270,7 +281,7 @@ namespace Motion
             }
         }
 
-        internal override void SetDelay(float delay)
+        public override void SetDelay(float delay)
         {
             base.SetDelay(delay);
             
@@ -295,6 +306,20 @@ namespace Motion
                 Animations.Add(animation);
             }
         }
+        internal void Setup(List<AnimationId> animations)
+        {
+            if (animations == null) return;
+            
+            for (var i = animations.Count - 1; i >= 0; i--)
+            {
+                var animation = animations[i];
+                if(!animation.IsActive() || animation.HasStarted()) continue;
+                
+                animation.SetAutoPlay(false);
+                
+                Animations.Add(animation);
+            }
+        }
 
         protected override bool Tick(float deltaTime)
         {
@@ -310,7 +335,7 @@ namespace Motion
             return Animations.Count == 0;
         }
 
-        internal override void Play()
+        public override void Play()
         {
             base.Play();
             
@@ -321,7 +346,7 @@ namespace Motion
             }
         }
 
-        internal override void Pause()
+        public override void Pause()
         {
             base.Pause();
             

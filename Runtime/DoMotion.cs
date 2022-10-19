@@ -74,7 +74,6 @@ namespace Motion
             if (freeStack.Count > 0)
             {
                 animation = (T) freeStack.Pop();
-                animation.Reset();
             }
             else
             {
@@ -106,6 +105,8 @@ namespace Motion
             {
                 freeStack.Push(animation);
             }
+            
+            animation.Reset();
         }
         
         public static SpringAnimationId<T> Spring<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : SpringAnimation<T>, new() => Spring<T, A>(getter, setter, target, Motion.Spring.Default);
@@ -151,6 +152,13 @@ namespace Motion
         }
         
         public static GroupAnimationId Group(params AnimationId[] animations)
+        {
+            var animation = Instance.GetFromPool<GroupAnimation>();
+            animation.Setup(animations);
+            
+            return new GroupAnimationId(animation.Id);
+        }
+        public static GroupAnimationId Group(List<AnimationId> animations)
         {
             var animation = Instance.GetFromPool<GroupAnimation>();
             animation.Setup(animations);

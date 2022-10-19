@@ -359,14 +359,11 @@ namespace Motion
         private float ElapsedTime { get; set; }
         private DampingProfile DampingProfile { get; set; }
 
-        public T Velocity { get; private set; }
-
         internal override void Reset()
         {
             base.Reset();
 
             SetSpring(Spring.Default);
-            Velocity = default;
             V0 = default;
             ElapsedTime = 0;
         }
@@ -497,17 +494,6 @@ namespace Motion
         protected abstract T Subtract(T a, T b);
         protected abstract T Multiply(T a, float b);
         protected abstract float SqrMagnitude(T a);
-        
-        public static T GetVelocity(uint id)
-        {
-            var animation = DoMotion.GetAnimation(id);
-            if (animation is SpringAnimation<T> springAnimation)
-            {
-                return springAnimation.Velocity;
-            }
-
-            return default;
-        }
     }
 
     internal enum DampingProfile

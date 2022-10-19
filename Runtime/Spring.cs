@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Motion
 {
@@ -49,5 +50,13 @@ namespace Motion
             sqrRestSpeed = 0.05f * 0.05f,
             sqrRestDelta = 0.05f * 0.05f
         };
+
+        public static bool operator ==(Spring lhs, Spring rhs) => Mathf.Approximately(lhs.stiffness, rhs.stiffness) && 
+                                                                  Mathf.Approximately(lhs.inverseMass, rhs.inverseMass) && 
+                                                                  Mathf.Approximately(lhs.damping, rhs.damping) && 
+                                                                  Mathf.Approximately(lhs.sqrRestSpeed, rhs.sqrRestSpeed) && 
+                                                                  Mathf.Approximately(lhs.sqrRestDelta, rhs.sqrRestDelta);
+
+        public static bool operator !=(Spring lhs, Spring rhs) => !(lhs == rhs);
     }
 }
