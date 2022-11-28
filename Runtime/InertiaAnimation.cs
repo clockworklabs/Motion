@@ -215,9 +215,9 @@ namespace Motion
         public InertiaAnimationId OnStep(Action callback)
         {
             var animation = DoMotion.GetAnimation(id);
-            if (animation is InertiaAnimation inertiaAnimation)
+            if (animation is InertiaAnimation)
             {
-                inertiaAnimation.OnStep(callback);
+                animation.OnStep(callback);
             }
 
             return this;
@@ -453,8 +453,6 @@ namespace Motion
 
             Setter(Target);
         }
-        
-        public void OnStep(Action callback) => OnStepCallback = callback;
 
         public void SetInitialVelocity(float velocity)
         {

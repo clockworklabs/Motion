@@ -220,9 +220,9 @@ namespace Motion
         public TweenAnimationId<T> OnStep(Action callback)
         {
             var animation = DoMotion.GetAnimation(id);
-            if (animation is TweenAnimation<T> tweenAnimation)
+            if (animation is TweenAnimation<T>)
             {
-                tweenAnimation.OnStep(callback);
+                animation.OnStep(callback);
             }
 
             return this;

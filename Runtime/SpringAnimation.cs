@@ -221,9 +221,9 @@ namespace Motion
         public SpringAnimationId<T> OnStep(Action callback)
         {
             var animation = DoMotion.GetAnimation(id);
-            if (animation is SpringAnimation<T> springAnimation)
+            if (animation is SpringAnimation<T>)
             {
-                springAnimation.OnStep(callback);
+                animation.OnStep(callback);
             }
 
             return this;

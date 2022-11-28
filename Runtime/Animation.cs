@@ -359,9 +359,9 @@ namespace Motion
         public AnimationId<T> OnStep(Action callback)
         {
             var animation = DoMotion.GetAnimation(id);
-            if (animation is Animation<T> tAnimation)
+            if (animation is Animation<T>)
             {
-                tAnimation.OnStep(callback);
+                animation.OnStep(callback);
             }
 
             return this;
@@ -503,6 +503,7 @@ namespace Motion
         private Action PlayCallback { get; set; }
         private Action PauseCallback { get; set; }
         private Action StopCallback { get; set; }
+        private Action StepCallback { get; set; }
         private Action CompleteCallback { get; set; }
 
         private float _delay;
@@ -530,6 +531,7 @@ namespace Motion
         public void OnPause(Action callback) => PauseCallback = callback;
 
         public void OnStop(Action callback) => StopCallback = callback;
+        public void OnStep(Action callback) => StepCallback = callback;
 
         public void OnComplete(Action callback) => CompleteCallback = callback;
 
@@ -542,6 +544,7 @@ namespace Motion
             PlayCallback = null;
             PauseCallback = null;
             StopCallback = null;
+            StepCallback = null;
             CompleteCallback = null;
 
             Started = false;
@@ -597,6 +600,7 @@ namespace Motion
             }
 
             var result = Tick(deltaTime);
+            StepCallback?.Invoke();
             
             if (result)
             {
@@ -615,7 +619,6 @@ namespace Motion
         protected T Origin { get; private set; }
         protected T Target { get; private set; }
         
-        private Action StepCallback { get; set; }
         private Action LoopCallback { get; set; }
         private Action IntervalCallback { get; set; }
 
@@ -673,8 +676,6 @@ namespace Motion
 
         public T Velocity { get; protected set; }
         
-        public void OnStep(Action callback) => StepCallback = callback;
-        
         public void OnLoop(Action callback) => LoopCallback = callback;
 
         public void OnInterval(Action callback) => IntervalCallback = callback;
@@ -698,7 +699,6 @@ namespace Motion
             Setter = null;
             Origin = default;
             Target = default;
-            StepCallback = null;
             LoopCallback = null;
             IntervalCallback = null;
             IsInterval = false;
@@ -757,8 +757,6 @@ namespace Motion
 
             var value = Getter();
             var done = Tick(deltaTime, ref value);
-            
-            StepCallback?.Invoke();
             
             Setter(value);
             

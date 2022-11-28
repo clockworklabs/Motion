@@ -155,6 +155,17 @@ namespace Motion
             return this;
         }
 
+        public GroupAnimationId OnStep(Action callback)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is GroupAnimation)
+            {
+                animation.OnStep(callback);
+            }
+
+            return this;
+        }
+
         public GroupAnimationId OnComplete(Action callback)
         {
             var animation = DoMotion.GetAnimation(id);
