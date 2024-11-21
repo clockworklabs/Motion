@@ -49,10 +49,10 @@ namespace Motion
         {
             if (ManualUpdate) return;
 
-            Step();
+            Step(Time.deltaTime);
         }
 
-        public void Step()
+        public void Step(float deltaTime)
         {
             for (var i = ActiveAnimations.Count - 1; i >= 0; i--)
             {
@@ -63,7 +63,7 @@ namespace Motion
                     animation.Play();
                 }
                 
-                animation.Step(Time.deltaTime);
+                animation.Step(deltaTime);
 
                 if (!animation.Active)
                 {
