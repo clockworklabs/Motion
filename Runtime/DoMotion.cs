@@ -7,6 +7,10 @@ namespace Motion
 {
     public class DoMotion : MonoBehaviour
     {
+        [SerializeField]
+        private bool _manualUpdate;
+        private bool ManualUpdate => _manualUpdate;
+        
         #region Singleton
         private static DoMotion instance;
         private static DoMotion Instance
@@ -42,6 +46,13 @@ namespace Motion
         private static uint _nextId;
         
         private void LateUpdate()
+        {
+            if (ManualUpdate) return;
+
+            Step();
+        }
+
+        public void Step()
         {
             for (var i = ActiveAnimations.Count - 1; i >= 0; i--)
             {

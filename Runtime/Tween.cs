@@ -21,9 +21,9 @@ namespace Motion
             duration = 1
         };
 
-        public static bool operator ==(Tween lhs, Tween rhs) => lhs.ease == rhs.ease && 
+        public static bool operator == (Tween lhs, Tween rhs) => lhs.ease == rhs.ease && 
                                                                 Mathf.Approximately(lhs.duration, rhs.duration);
 
-        public static bool operator !=(Tween lhs, Tween rhs) => !(lhs == rhs);
+        public static bool operator != (Tween lhs, Tween rhs) => !(lhs == rhs);
     }
 }
