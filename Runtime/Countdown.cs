@@ -5,9 +5,9 @@ namespace Motion
 {
     public readonly struct CountdownId
     {
-        public readonly uint id;
+        public readonly ulong id;
 
-        public CountdownId(uint id)
+        public CountdownId(ulong id)
         {
             this.id = id;
         }
@@ -262,7 +262,7 @@ namespace Motion
             return this;
         }
         
-        public static implicit operator uint(CountdownId animation) => animation.id;
+        public static implicit operator ulong(CountdownId animation) => animation.id;
         public static implicit operator AnimationId(CountdownId animation) => new AnimationId(animation.id);
     }
     

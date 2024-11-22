@@ -5,9 +5,9 @@ namespace Motion
 {
     public readonly struct SpringAnimationId<T> where T : struct, IEquatable<T>
     {
-        public readonly uint id;
+        public readonly ulong id;
 
-        public SpringAnimationId(uint id)
+        public SpringAnimationId(ulong id)
         {
             this.id = id;
         }
@@ -332,7 +332,7 @@ namespace Motion
             return this;
         }
         
-        public static implicit operator uint(SpringAnimationId<T> animation) => animation.id;
+        public static implicit operator ulong(SpringAnimationId<T> animation) => animation.id;
         public static implicit operator AnimationId<T>(SpringAnimationId<T> animation) => new AnimationId<T>(animation.id);
         public static implicit operator AnimationId(SpringAnimationId<T> animation) => new AnimationId(animation.id);
     }

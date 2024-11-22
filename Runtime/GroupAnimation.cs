@@ -6,9 +6,9 @@ namespace Motion
 {
     public readonly struct GroupAnimationId
     {
-        public readonly uint id;
+        public readonly ulong id;
 
-        public GroupAnimationId(uint id)
+        public GroupAnimationId(ulong id)
         {
             this.id = id;
         }
@@ -264,7 +264,7 @@ namespace Motion
             return false;
         }
         
-        public static implicit operator uint(GroupAnimationId animation) => animation.id;
+        public static implicit operator ulong(GroupAnimationId animation) => animation.id;
         public static implicit operator AnimationId(GroupAnimationId animation) => new AnimationId(animation.id);
     }
     

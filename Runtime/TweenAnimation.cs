@@ -6,9 +6,9 @@ namespace Motion
     
     public readonly struct TweenAnimationId<T> where T : struct, IEquatable<T>
     {
-        public readonly uint id;
+        public readonly ulong id;
 
-        public TweenAnimationId(uint id)
+        public TweenAnimationId(ulong id)
         {
             this.id = id;
         }
@@ -348,7 +348,7 @@ namespace Motion
             return this;
         }
         
-        public static implicit operator uint(TweenAnimationId<T> animation) => animation.id;
+        public static implicit operator ulong(TweenAnimationId<T> animation) => animation.id;
         public static implicit operator AnimationId<T>(TweenAnimationId<T> animation) => new AnimationId<T>(animation.id);
         public static implicit operator AnimationId(TweenAnimationId<T> animation) => new AnimationId(animation.id);
     }

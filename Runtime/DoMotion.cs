@@ -9,27 +9,36 @@ namespace Motion
     {
         [SerializeField]
         private bool _manualUpdate;
-        private bool ManualUpdate => _manualUpdate;
+        public bool ManualUpdate
+        {
+            get => _manualUpdate;
+            set
+            {
+                if (_manualUpdate == value) return;
+                _manualUpdate = value;
+                enabled = !value;
+            }
+        }
         
         #region Singleton
-        private static DoMotion instance;
+        private static DoMotion _instance;
         private static DoMotion Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    var gameObject = new GameObject("Motion", typeof(DoMotion));
-                    instance = gameObject.GetComponent<DoMotion>();
+                    var gameObject = new GameObject("DoMotion", typeof(DoMotion));
+                    _instance = gameObject.GetComponent<DoMotion>();
                 }
 
-                return instance;
+                return _instance;
             }
         }
 
         private void Start()
         {
-            if (Instance != this)
+            if (_instance != this)
             {
                 Destroy(gameObject);
                 return;
@@ -39,15 +48,19 @@ namespace Motion
         }
         #endregion
         
-        private List<Animation> ActiveAnimations { get; } = new List<Animation>();
-        private Dictionary<uint, Animation> ActiveAnimationsById { get; } = new Dictionary<uint, Animation>();
-        private Dictionary<Type, Stack<Animation>> FreeAnimations { get; } = new Dictionary<Type, Stack<Animation>>();
+        private List<Animation> ActiveAnimations { get; } = new();
+        private Dictionary<ulong, Animation> ActiveAnimationsById { get; } = new();
+        private Dictionary<Type, Stack<Animation>> FreeAnimations { get; } = new();
         
-        private static uint _nextId;
+        private static ulong _nextId;
         
         private void LateUpdate()
         {
-            if (ManualUpdate) return;
+            if (ManualUpdate)
+            {
+                enabled = false;
+                return;
+            }
 
             Step(Time.deltaTime);
         }
@@ -293,9 +306,6 @@ namespace Motion
             return new CountdownId(animation.Id);
         }
 
-        internal static Animation GetAnimation(uint id)
-        {
-            return Instance.ActiveAnimationsById.TryGetValue(id, out var animation) ? animation : null;
-        }
+        internal static Animation GetAnimation(ulong id) => Instance.ActiveAnimationsById.GetValueOrDefault(id);
     }
 }

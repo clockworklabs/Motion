@@ -7,9 +7,9 @@ namespace Motion
     
     public readonly struct AnimationId
     {
-        public readonly uint id;
+        public readonly ulong id;
 
-        public AnimationId(uint id)
+        public AnimationId(ulong id)
         {
             this.id = id;
         }
@@ -140,14 +140,14 @@ namespace Motion
             animation?.Stop(complete);
         }
         
-        public static implicit operator uint(AnimationId animation) => animation.id;
+        public static implicit operator ulong(AnimationId animation) => animation.id;
     }
     
     public readonly struct AnimationId<T> where T : struct, IEquatable<T>
     {
-        public readonly uint id;
+        public readonly ulong id;
 
-        public AnimationId(uint id)
+        public AnimationId(ulong id)
         {
             this.id = id;
         }
@@ -411,13 +411,13 @@ namespace Motion
             return this;
         }
         
-        public static implicit operator uint(AnimationId<T> animation) => animation.id;
+        public static implicit operator ulong(AnimationId<T> animation) => animation.id;
         public static implicit operator AnimationId(AnimationId<T> animation) => new (animation.id);
     }
     
     public abstract class Animation
     {
-        public uint Id { get; internal set; }
+        public ulong Id { get; internal set; }
 
         private bool _started;
         internal bool Started
