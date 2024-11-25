@@ -1,6 +1,6 @@
 {
   "name": "com.clockworklabs.motion",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "displayName": "Motion",
   "description": "Animation library for Unity",
   "unity": "2022.3",

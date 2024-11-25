@@ -38,11 +38,35 @@ namespace Motion
 
         private void Start()
         {
-            if (_instance != this)
+            if (_instance != null && _instance.GetInstanceID() != GetInstanceID())
             {
-                Destroy(gameObject);
-                return;
+                ActiveAnimations.AddRange(_instance.ActiveAnimations);
+                foreach (var pair in _instance.ActiveAnimationsById)
+                {
+                    ActiveAnimationsById.Add(pair.Key, pair.Value);
+                }
+                foreach (var pair in _instance.FreeAnimations)
+                {
+                    FreeAnimations.Add(pair.Key, pair.Value);
+                }
+
+                var otherGameObject = _instance.gameObject;
+                var count = 0;
+                for (int i = 0, n = otherGameObject.GetComponentCount(); i < n; i++)
+                {
+                    if(otherGameObject.GetComponentAtIndex(i) is DoMotion or Transform)continue;
+                    count++;
+                }
+
+                if (count > 0)
+                {
+                    Destroy(_instance);
+                } else {
+                    Destroy(otherGameObject);
+                }
             }
+            
+            _instance = this;
             
             DontDestroyOnLoad(this);
         }
