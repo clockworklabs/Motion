@@ -5,91 +5,15 @@ using UnityEngine;
 
 namespace Motion
 {
-    public class DoMotion : MonoBehaviour
+    public static class DoMotion
     {
-        [SerializeField]
-        private bool _manualUpdate;
-        public bool ManualUpdate
-        {
-            get => _manualUpdate;
-            set
-            {
-                if (_manualUpdate == value) return;
-                _manualUpdate = value;
-                enabled = !value;
-            }
-        }
-        
-        #region Singleton
-        private static DoMotion _instance;
-        private static DoMotion Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    var gameObject = new GameObject("DoMotion", typeof(DoMotion));
-                    _instance = gameObject.GetComponent<DoMotion>();
-                }
-
-                return _instance;
-            }
-        }
-
-        private void Start()
-        {
-            if (_instance != null && _instance.GetInstanceID() != GetInstanceID())
-            {
-                ActiveAnimations.AddRange(_instance.ActiveAnimations);
-                foreach (var pair in _instance.ActiveAnimationsById)
-                {
-                    ActiveAnimationsById.Add(pair.Key, pair.Value);
-                }
-                foreach (var pair in _instance.FreeAnimations)
-                {
-                    FreeAnimations.Add(pair.Key, pair.Value);
-                }
-
-                var otherGameObject = _instance.gameObject;
-                var count = 0;
-                for (int i = 0, n = otherGameObject.GetComponentCount(); i < n; i++)
-                {
-                    if(otherGameObject.GetComponentAtIndex(i) is DoMotion or Transform)continue;
-                    count++;
-                }
-
-                if (count > 0)
-                {
-                    Destroy(_instance);
-                } else {
-                    Destroy(otherGameObject);
-                }
-            }
-            
-            _instance = this;
-            
-            DontDestroyOnLoad(this);
-        }
-        #endregion
-        
-        private List<Animation> ActiveAnimations { get; } = new();
-        private Dictionary<ulong, Animation> ActiveAnimationsById { get; } = new();
-        private Dictionary<Type, Stack<Animation>> FreeAnimations { get; } = new();
+        private static List<Animation> ActiveAnimations { get; } = new();
+        private static Dictionary<ulong, Animation> ActiveAnimationsById { get; } = new();
+        private static Dictionary<Type, Stack<Animation>> FreeAnimations { get; } = new();
         
         private static ulong _nextId;
-        
-        private void LateUpdate()
-        {
-            if (ManualUpdate)
-            {
-                enabled = false;
-                return;
-            }
 
-            Step(Time.deltaTime);
-        }
-
-        public void Step(float deltaTime)
+        public static void Step(float deltaTime)
         {
             for (var i = ActiveAnimations.Count - 1; i >= 0; i--)
             {
@@ -109,7 +33,7 @@ namespace Motion
             }
         }
 
-        private T GetFromPool<T>() where T : Animation, new()
+        private static T GetFromPool<T>() where T : Animation, new()
         {
             var type = typeof(T);
             if (!FreeAnimations.TryGetValue(type, out var freeStack))
@@ -139,7 +63,7 @@ namespace Motion
             return animation;
         }
 
-        private void ReturnToPool(int index)
+        private static void ReturnToPool(int index)
         {
             if (index < 0 || index >= ActiveAnimations.Count) return;
             
@@ -160,7 +84,7 @@ namespace Motion
         public static SpringAnimationId<T> Spring<T, A>(Func<T> getter, Action<T> setter, T target) where T : struct, IEquatable<T> where A : SpringAnimation<T>, new() => Spring<T, A>(getter, setter, target, Motion.Spring.Default);
         public static SpringAnimationId<T> Spring<T, A>(Func<T> getter, Action<T> setter, T target, Spring spring) where T : struct, IEquatable<T> where A : SpringAnimation<T>, new()
         {
-            var animation = Instance.GetFromPool<A>();
+            var animation = GetFromPool<A>();
             animation.Setup(getter, setter, target);
             animation.SetSpring(spring);
             
@@ -175,7 +99,7 @@ namespace Motion
             });
         public static TweenAnimationId<T> Tween<T, A>(Func<T> getter, Action<T> setter, T target, Tween tween) where T : struct, IEquatable<T> where A : TweenAnimation<T>, new()
         {
-            var animation = Instance.GetFromPool<A>();
+            var animation = GetFromPool<A>();
             animation.Setup(getter, setter, target);
             animation.SetTween(tween);
             
@@ -190,7 +114,7 @@ namespace Motion
             Inertia(getter, setter, velocity, inertia, float.MinValue, float.MaxValue);
         public static InertiaAnimationId Inertia(Func<float> getter, Action<float> setter, float velocity, Inertia inertia, float min, float max)
         {
-            var animation = Instance.GetFromPool<InertiaAnimation>();
+            var animation = GetFromPool<InertiaAnimation>();
             animation.Setup(getter, setter);
             animation.SetInertia(inertia);
             animation.SetInitialVelocity(velocity);
@@ -201,14 +125,14 @@ namespace Motion
         
         public static GroupAnimationId Group(params AnimationId[] animations)
         {
-            var animation = Instance.GetFromPool<GroupAnimation>();
+            var animation = GetFromPool<GroupAnimation>();
             animation.Setup(animations);
             
             return new GroupAnimationId(animation.Id);
         }
         public static GroupAnimationId Group(List<AnimationId> animations)
         {
-            var animation = Instance.GetFromPool<GroupAnimation>();
+            var animation = GetFromPool<GroupAnimation>();
             animation.Setup(animations);
             
             return new GroupAnimationId(animation.Id);
@@ -323,13 +247,13 @@ namespace Motion
 
         public static CountdownId Countdown(float time, Action callback)
         {
-            var animation = Instance.GetFromPool<Countdown>();
+            var animation = GetFromPool<Countdown>();
             animation.SetDuration(time);
             animation.OnComplete(callback);
             
             return new CountdownId(animation.Id);
         }
 
-        internal static Animation GetAnimation(ulong id) => Instance.ActiveAnimationsById.GetValueOrDefault(id);
+        internal static Animation GetAnimation(ulong id) => ActiveAnimationsById.GetValueOrDefault(id);
     }
 }
