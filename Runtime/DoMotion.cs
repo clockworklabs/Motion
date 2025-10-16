@@ -7,6 +7,8 @@ namespace Motion
 {
     public static class DoMotion
     {
+        public static event Action<float> OnStep;
+        
         private static List<Animation> ActiveAnimations { get; } = new();
         private static Dictionary<ulong, Animation> ActiveAnimationsById { get; } = new();
         private static Dictionary<Type, Stack<Animation>> FreeAnimations { get; } = new();
@@ -31,6 +33,8 @@ namespace Motion
                     ReturnToPool(i);
                 }
             }
+            
+            OnStep?.Invoke(deltaTime);
         }
 
         private static T GetFromPool<T>() where T : Animation, new()
