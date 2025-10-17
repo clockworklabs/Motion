@@ -12,6 +12,18 @@ namespace Motion
         {
             this.id = id;
         }
+
+        public static bool From(ulong id, out TweenAnimationId<T> result)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is TweenAnimation<T>)
+            {
+                result = new TweenAnimationId<T>(id);
+                return true;
+            }
+            result = default;
+            return false;
+        }
         
         public bool HasStarted(out bool started)
         {

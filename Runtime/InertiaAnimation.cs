@@ -11,6 +11,18 @@ namespace Motion
         {
             this.id = id;
         }
+
+        public static bool From(ulong id, out InertiaAnimationId result)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is InertiaAnimation)
+            {
+                result = new InertiaAnimationId(id);
+                return true;
+            }
+            result = default;
+            return false;
+        }
         
         public bool HasStarted(out bool started)
         {

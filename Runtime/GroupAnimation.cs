@@ -12,6 +12,18 @@ namespace Motion
         {
             this.id = id;
         }
+
+        public static bool From(ulong id, out GroupAnimationId result)
+        {
+            var animation = DoMotion.GetAnimation(id);
+            if (animation is GroupAnimation)
+            {
+                result = new GroupAnimationId(id);
+                return true;
+            }
+            result = default;
+            return false;
+        }
         
         public bool HasStarted(out bool started)
         {
