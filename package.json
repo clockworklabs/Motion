@@ -1,16 +1,15 @@
 {
-  "name": "com.clockworklabs.motion",
-  "version": "1.7.8",
+  "name": "io.clockworklabs.motion",
+  "version": "1.7.9",
   "displayName": "Motion",
   "description": "Animation library for Unity",
   "unity": "2022.3",
   "author": {
-    "name": "Lisandro Crespo",
-    "email": "hey@lisandroct.com",
-    "url": "https://lisandroct.com"
+    "name": "Clockwork Labs",
+    "email": "rish@clockworklabs.io",
+    "url": "https://clockworklabs.io"
   },
   "dependencies": {
-    "com.unity.collections": "0.9.0-preview.6"
-  },
-  "type": "library"
+    "com.unity.collections": "1.2.4"
+  }
 }
