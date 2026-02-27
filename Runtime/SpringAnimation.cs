@@ -385,6 +385,7 @@ namespace Motion
             base.Setup(getter, setter, target);
             
             X0 = Subtract(target, Origin);
+            V0 = Multiply(Velocity, -1);
         }
 
         protected override void PrepareForLoop()

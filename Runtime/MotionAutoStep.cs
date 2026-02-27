@@ -2,10 +2,10 @@
 
 namespace Motion
 {
-    public class MotionAutoUpdate : MonoBehaviour
+    public class MotionAutoStep : MonoBehaviour
     {
-        #region Singleton
-        private static MotionAutoUpdate _instance;
+#region Singleton
+        private static MotionAutoStep _instance;
 
         private void Start()
         {
@@ -15,7 +15,7 @@ namespace Motion
                 var hasOtherComponents = false;
                 for (int i = 0, n = otherGameObject.GetComponentCount(); i < n; i++)
                 {
-                    if(otherGameObject.GetComponentAtIndex(i) is MotionAutoUpdate or Transform)continue;
+                    if(otherGameObject.GetComponentAtIndex(i) is MotionAutoStep or Transform)continue;
                     hasOtherComponents = true;
                     break;
                 }
@@ -32,7 +32,7 @@ namespace Motion
             
             DontDestroyOnLoad(this);
         }
-        #endregion
+#endregion
         
         private void LateUpdate() => DoMotion.Step(Time.deltaTime);
     }
