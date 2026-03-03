@@ -9,6 +9,12 @@ namespace Motion
         public Ease ease;
         public float duration;
 
+        public Tween(Ease ease, float duration)
+        {
+            this.ease = ease;
+            this.duration = duration;
+        }
+
         public Tween(Tween other)
         {
             ease = other.ease;

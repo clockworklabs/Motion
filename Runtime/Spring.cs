@@ -6,14 +6,39 @@ namespace Motion
     [Serializable]
     public struct Spring
     {
-        public float stiffness;
         public float inverseMass;
+        public float stiffness;
         public float damping;
 
         public float sqrRestSpeed;
         public float sqrRestDelta;
 
+        public float mass
+        {
+            get => 1 / inverseMass;
+            set => inverseMass = 1 / value;
+        }
+        public float restSpeed
+        {
+            get => Mathf.Sqrt(sqrRestSpeed);
+            set => sqrRestSpeed = value * value;
+        }
+        public float restDelta
+        {
+            get => Mathf.Sqrt(sqrRestDelta);
+            set => sqrRestDelta = value * value;
+        }
+
         public static Spring Default => Soft;
+
+        public Spring(float mass, float stiffness, float damping, float restSpeed = 0.05f, float restDelta = 0.05f)
+        {
+            inverseMass = 1 / mass;
+            this.stiffness = stiffness;
+            this.damping = damping;
+            sqrRestSpeed = restSpeed * restSpeed;
+            sqrRestDelta = restDelta * restDelta;           
+        }
 
         public Spring(Spring other)
         {
