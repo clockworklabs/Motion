@@ -1,0 +1,37 @@
+﻿using System;
+
+namespace Motion
+{
+    [Serializable]
+    public struct Inertia
+    {
+        public float power;
+
+        public float bounceStiffness;
+        public float bounceInverseMass;
+        public float bounceDamping;
+
+        public float restSpeed;
+        public float restDelta;
+
+        public Inertia(Inertia other)
+        {
+            power = other.power;
+            bounceStiffness = other.bounceStiffness;
+            bounceInverseMass = other.bounceInverseMass;
+            bounceDamping = other.bounceDamping;
+            restSpeed = other.restSpeed;
+            restDelta = other.restDelta;
+        }
+
+        public static Inertia Default = new Inertia
+        {
+            power = 0.8f,
+            bounceStiffness = 170,
+            bounceInverseMass = 1,
+            bounceDamping = 26,
+            restSpeed = 0.05f,
+            restDelta = 0.05f
+        };
+    }
+}
