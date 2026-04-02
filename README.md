@@ -20,4 +20,4 @@ If you're new to Spring animations, these are great resources to start with:
 ## Installation
 Installing Motion is simple. You can add the package via the Unity Package Manager using the Git URL, or by modifying your `manifest.json` file directly.
 
-Add the following package URL: `https://github.com/clockworklabs/Motion#[target-version]` (latest is `1.8.0`).
+Add the following package URL: `https://github.com/clockworklabs/Motion.git#[target-version]` (latest is `1.8.0`).
