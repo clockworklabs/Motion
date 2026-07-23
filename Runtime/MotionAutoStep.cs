@@ -9,7 +9,11 @@ namespace Motion
 
         private void Start()
         {
+#if UNITY_6000_5_OR_NEWER
+            if (_instance != null && _instance.GetEntityId() != GetEntityId())
+#else
             if (_instance != null && _instance.GetInstanceID() != GetInstanceID())
+#endif
             {
                 var otherGameObject = _instance.gameObject;
                 var hasOtherComponents = false;

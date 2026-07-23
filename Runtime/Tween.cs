@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Motion
 {
     [Serializable]
-    public struct Tween
+    public struct Tween : IEquatable<Tween>
     {
         public Ease ease;
         public float duration;
@@ -27,9 +27,12 @@ namespace Motion
             duration = 1
         };
 
-        public static bool operator == (Tween lhs, Tween rhs) => lhs.ease == rhs.ease && 
-                                                                Mathf.Approximately(lhs.duration, rhs.duration);
+        public static bool operator == (Tween lhs, Tween rhs) => lhs.Equals(rhs);
 
         public static bool operator != (Tween lhs, Tween rhs) => !(lhs == rhs);
+        
+        public bool Equals(Tween other) => this.ease == other.ease && Mathf.Approximately(this.duration, other.duration);
+        public override bool Equals(object obj) => obj is Tween other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine((int)ease, duration);
     }
 }

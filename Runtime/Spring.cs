@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Motion
 {
     [Serializable]
-    public struct Spring
+    public struct Spring : IEquatable<Spring>
     {
         public float inverseMass;
         public float stiffness;
@@ -76,12 +76,16 @@ namespace Motion
             sqrRestDelta = 0.05f * 0.05f
         };
 
-        public static bool operator ==(Spring lhs, Spring rhs) => Mathf.Approximately(lhs.stiffness, rhs.stiffness) && 
-                                                                  Mathf.Approximately(lhs.inverseMass, rhs.inverseMass) && 
-                                                                  Mathf.Approximately(lhs.damping, rhs.damping) && 
-                                                                  Mathf.Approximately(lhs.sqrRestSpeed, rhs.sqrRestSpeed) && 
-                                                                  Mathf.Approximately(lhs.sqrRestDelta, rhs.sqrRestDelta);
+        public static bool operator ==(Spring lhs, Spring rhs) => lhs.Equals(rhs);
 
         public static bool operator !=(Spring lhs, Spring rhs) => !(lhs == rhs);
+
+        public bool Equals(Spring other) => Mathf.Approximately(this.stiffness, other.stiffness) && 
+                                            Mathf.Approximately(this.inverseMass, other.inverseMass) && 
+                                            Mathf.Approximately(this.damping, other.damping) && 
+                                            Mathf.Approximately(this.sqrRestSpeed, other.sqrRestSpeed) && 
+                                            Mathf.Approximately(this.sqrRestDelta, other.sqrRestDelta);
+        public override bool Equals(object obj) => obj is Spring other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(inverseMass, stiffness, damping, sqrRestSpeed, sqrRestDelta);
     }
 }
